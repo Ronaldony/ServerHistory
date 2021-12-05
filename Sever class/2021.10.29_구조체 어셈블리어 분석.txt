@@ -1,0 +1,26 @@
+// 구조체 반환 분석
+stData ret = test2(10);
+003D1CC0 6A 0A                push        0Ah   (ebp+0ch)
+// 파라미터 push
+003D1CC2 8D 85 7C FE FF FF    lea         eax,[ebp+FFFFFE7Ch]  
+// eax에 ebp-388 주소 대입 (ebp+FFFFFE7Ch = ebp - 388)
+003D1CC8 50                   push        eax   (ebp+08h), 0x00DAF938
+003D1CC9 E8 C4 F7 FF FF       call        003D1492  
+// 함수 호출
+003D1CCE 83 C4 08             add         esp,8  
+// 스택 정리
+003D1CD1 B9 08 00 00 00       mov         ecx,8  
+/* 구조체 값 복사 첫 번째 */
+003D1CD6 8B F0                mov         esi,eax  
+// esi = eax = 0x00DAF938
+003D1CD8 8D BD A4 FE FF FF    lea         edi,[ebp+FFFFFEA4h]  
+// edi = (ebp - 348) = 0xDAF960
+003D1CDE F3 A5                rep movs    dword ptr es:[edi],dword ptr [esi]
+// esi 주소에 저장된 값을 edi 주소 공간에 대입 => [0xDAF960+n] = [0x00DAF938+n]
+// 구조체 복사 완료
+003D1CE0 B9 08 00 00 00       mov         ecx,8  
+/* 구조체 값 복사 두 번째 */
+/* 이전에 완료된 복사 값을 다시 대입 => 왜 불필요한 동작을 하는 것인지 이해가 안 감 */
+003D1CE5 8D B5 A4 FE FF FF    lea         esi,[ebp+FFFFFEA4h]  
+003D1CEB 8D 7D 8C             lea         edi,[ebp-74h]  
+003D1CEE F3 A5                rep movs    dword ptr es:[edi],dword ptr [esi]
