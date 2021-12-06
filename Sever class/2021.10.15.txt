@@ -1,4 +1,4 @@
-#2021.10.15
+# 2021.10.15
 1. Release 빌드 모드
     1) pdb 파일
         \projectFile\Release or Debug\.pdb: 프로그램 데이터베이스 파일(C 소스와 기계어를 맵핑해주는 파일)
