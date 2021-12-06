@@ -1,4 +1,4 @@
-2021.10.15
+#2021.10.15
 1. Release 빌드 모드
     1) pdb 파일
         \projectFile\Release or Debug\.pdb: 프로그램 데이터베이스 파일(C 소스와 기계어를 맵핑해주는 파일)
@@ -10,9 +10,9 @@
 
 2. Debug 빌드 모드
     1) Debug 빌드 모드에서는 inline 키워드가 사용되지 않음(프로젝트 속성에서 변경 가능)
-    
+
 3. Release와 Debug 빌드 모드의 차이점(간략하게)
-    1) Debug 모드의 경우 각 함수 단위 기준으로 
+    1) Debug 모드의 경우 각 함수 단위 기준으로
 
 4. Endian
     1) Little: 낮은 값은 낮은 주소에 큰 값은 큰 주소에
