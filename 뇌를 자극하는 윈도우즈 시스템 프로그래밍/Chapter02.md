@@ -1,7 +1,7 @@
 # Chapter02 아스키코드vs유니코드
-## section01 컴퓨터 구조와 프로그래밍 모델
+## Section01 컴퓨터 구조와 프로그래밍 모델
 
-	1. 아스키 코드와 유니코드
+1. 아스키 코드와 유니코드
 
 		1) 아스키코드: 7bit로 표현되는 문자 매핑에 관한 코드
 		2) 유니코드: 2byte로 표현되는 문자 매핑에 관한 코드
@@ -21,7 +21,7 @@
 
 		따라서, 유니코드로 작성하면 윈도우에서 제공하는 라이브러리 함수 호출 시 문자 변환 과정이 없어진다.
 
-5. wprintf, fputws와 같은 함수를 통해 "유니코드" 기반으로 한글을 출력하고자 한다면, _wsetlocale(LC_ALL, L"Korean")이 코드에 포함되어야 한다.
+5. wprintf, fputws와 같은 함수를 통해 '유니코드' 기반으로 '한글'을 출력하고자 한다면, _wsetlocale(LC_ALL, L"Korean")이 코드에 포함되어야 한다.
 
 6. 프로그램 실행 시 "전달되는 명령행"을 유니코드로 전달
 
@@ -40,3 +40,31 @@
 		2) WBCS 기반 문자열 조작 함수
 		* 참조: https://makersweb.net/cpp/1394
 		* 안전 문자열 함수에서 문자 사이즈에 대한 내용(TODO: 유니코드 기반으로 작성된 안전 문자열 함수 사용 시 버퍼 크기 입력에 관한 내용 추가)
+
+## Section02 MBCS와 WBCS의 동시 지원
+
+1. #include <windows.h>
+
+		1) windows.h: Windows 기반 프로그래밍 시 기본적으로 항상 포함되어야 하는 헤더 파일이다.
+
+2. Windows에서 정의하고 있는 자료형
+
+		1) Windows에서는 typedef 키워드를 사용하여 자료형을 Windows 스타일로 정의한다.
+			* 참조: https://docs.microsoft.com/ko-kr/windows/win32/winprog/windows-data-types
+		2) 장점: 편의성(원본 자료형이 길 경우 간결하게 표현이 가능), 확장의 용이성(사용중인 자료형들을 일괄적으로 변경하여야하는 경우에 용이함)
+			=> 책에서 설명하는 편의성에 대한 장점은 Trade off가 있다고 생각한다. 정확히 어떤 자료형인지 추적하여야하기 때문이다.
+
+3. MBCS와 WBCS(유니코드)를 동시에 지원하기 위한 매크로
+
+	1) Windows에서는 MBCS와 WBCS를 동시에 수용하는 프로그램 구현을 위한 매크로를 지원한다. 이는 UNICODE 매크로의 정의를 기준으로 작성되고 tchar.h에 포함되어 있다. 본 책에서는 다음과 같은 예시를 소개한다.
+		<pre><code>
+		#ifdef UNICODE
+			typedef WCHAR			TCHAR;
+			typedef LPWSTR		LPTSTR;
+			typedef LPCWSTR		LPCTSTR;
+		#else
+			typedef CHAR			TCHAR;
+			typedef LPSTR		LPTSTR;
+			typedef LPCSTR		LPCTSTR;
+		#endif
+		</code></pre>
