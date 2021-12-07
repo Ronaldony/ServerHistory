@@ -25,3 +25,31 @@
   2. 64비트와 32비트 공존의 문제점
 
     1) 64비트 주소 값을 32비트 변수에 저장할 때 주소 값에 대한 손실 문제가 발생한다. 예시는 다음과 같다.
+      #include <stdio.h>
+      int main(void)
+      {
+        int arr[10];              // LLP64에서는 arr가 64비트의 값을 갖는다.
+        int arrAddr = (int)arr;   // int의 크기가 32bit여서 arr의 주소 값이 32비트만큼 손실된다.
+
+        printf("arrAddr: %d\n", arr);
+        return 0;
+      }
+      * 따라서, 64비트 시스템에서는 주소 값을 32비트 크기 변수에 저장하지 않아야 한다.
+
+  3. Windows 스타일 자료형
+
+    1) Microsoft C/C++ 에서는 __int8, __int16, __int32, __int64로 타입을 선언할 수 있다.
+
+## Section03 오류의 확인
+  1. GetLastError 함수와 에러코드
+
+    1) Windows 시스템 함수를 호출하는 과정에서 오류가 발생하면, GetLastError 함수를 통해 오류의 원인을 확인할 수 있다.
+      => 단, 성공여부와 상관없이 시스템 함수가 호출될 때마다 GetLastError 함수 반환 에러코드가 갱신된다.
+    *참조: https://docs.microsoft.com/ko-kr/windows/win32/debug/system-error-codes--0-499-
+
+## Section04 System Programming Project Design
+  저자는 해당 챕터3 부터 일반적인 프로그램 예시가 아닌 프로젝트 형식의 명령 프롬프트 프로그램을 구현하여 배운 내용에 대한 이해를 높이고자 한다. 이에 따라 일부 챕터의 마지막 섹션에는 이 섹션과 같은 프롬프트 프로그램 구현에 관한 섹션이 구성되어 있다.  
+
+  1. 명령 프롬프트 프로젝트의 제안과 EXIT 명령어의 구현
+
+     해당 소스코드는 같은 디렉터리에 Chapter03_CommPrmtExit.cpp 이름으로 업로드 해놓았습니다. 책의 소스코드와 결과는 동일하지만 구현은 다르게 해놓았으며 문제점이나 개선점 혹은 질문사항이 있으신경우 코멘트로 남겨주시면 감사하겠습니다.
