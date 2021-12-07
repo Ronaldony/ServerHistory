@@ -1,9 +1,9 @@
-section05 하드웨어 구성의 재접근
+## section05 하드웨어 구성의 재접근
     1. CPU와 메모리 간 버스 시스템
         -CPU가 메모리로부터 명령어를 Fetch하는 과정에서 버스 시스템의 컨트롤 버스, 데이터 버스, 주소 버스가 하는 역할을 정리한다.
-        -컨트롤 버스: 
+        -컨트롤 버스:
         -데이터 버스:
-        -주소 버스: 
+        -주소 버스:
     2. 고찰
         1) 윈도우에서 PC의 역할을 하는 레지스터는 IP이다.
             -CPU 내부에는 MAR(Memory Address Register), MBR(Memory Buffer Register)가 존재하여 Fetch 과정에 관여한다.
