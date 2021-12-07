@@ -57,7 +57,6 @@
 3. MBCS와 WBCS(유니코드)를 동시에 지원하기 위한 매크로
 
 		1) Windows에서는 MBCS와 WBCS를 동시에 수용하는 프로그램 구현을 위한 매크로를 지원한다. 이는 UNICODE 매크로의 정의를 기준으로 작성되고 tchar.h에 포함되어 있다. 본 책에서는 다음과 같은 예시를 소개한다.
-			<pre><code>
 			#ifdef UNICODE 혹은 _UNICODE
 				typedef WCHAR			TCHAR;
 				typedef LPWSTR		LPTSTR;
@@ -70,7 +69,6 @@
 				#define __T(x)		x
 			#endif
 			#define _T(x)				__T(x)
-			</code></pre>
 		2) Visual Studio에서는 기본적으로 전처리기 옵션에서 UNICODE, _UNICODE를 정의하고 있다.
 
 4. MBCS와 WBCS를 동시에 지원하기 위한 함수들
