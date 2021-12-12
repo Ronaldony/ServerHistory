@@ -39,59 +39,61 @@
 ### CreateProcess 함수의 이해
 1. CreateProcess 함수를 호출하면 자식 프로세스를 생성하게 된다. 이 때 CreateProcess 함수를 호출한 프로세스는 부모 프로세스가 된다.
 2. CreateProcess 함수 선언 형태
-<pre><code>
-BOOL CreateProcessA(
-LPCSTR                lpApplicationName,      // 실행파일 이름
-LPSTR                 lpCommandLine,          // 실행파일 명령행(표준 검색경로 기준 실행파일 탐색)
-LPSECURITY_ATTRIBUTES lpProcessAttributes,    // 프로세스 보안 속성
-LPSECURITY_ATTRIBUTES lpThreadAttributes,     // 스레드 보안 속성
-BOOL                  bInheritHandles,        // 핸들 테이블 상속 여부
-DWORD                 dwCreationFlags,        // 프로세스 특성
-LPVOID                lpEnvironment,          // 환경블럭 옵션
-LPCSTR                lpCurrentDirectory,     // 자식 프로세스의 현재 디렉터리 설정 
-LPSTARTUPINFOA        lpStartupInfo,          // STARTUP_INFO 구조체
-LPPROCESS_INFORMATION lpProcessInformation    // PROCESS_INFORMATION 구조체
-);
-* 출처: https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessa
-</code></pre>    
+    <pre><code>
+    BOOL CreateProcessA(
+    LPCSTR                lpApplicationName,      // 실행파일 이름
+    LPSTR                 lpCommandLine,          // 실행파일 명령행(표준 검색경로 기준 실행파일 탐색)
+    LPSECURITY_ATTRIBUTES lpProcessAttributes,    // 프로세스 보안 속성
+    LPSECURITY_ATTRIBUTES lpThreadAttributes,     // 스레드 보안 속성
+    BOOL                  bInheritHandles,        // 핸들 테이블 상속 여부
+    DWORD                 dwCreationFlags,        // 프로세스 특성
+    LPVOID                lpEnvironment,          // 환경블럭 옵션
+    LPCSTR                lpCurrentDirectory,     // 자식 프로세스의 현재 디렉터리 설정 
+    LPSTARTUPINFOA        lpStartupInfo,          // STARTUP_INFO 구조체
+    LPPROCESS_INFORMATION lpProcessInformation    // PROCESS_INFORMATION 구조체
+    );
+    * 출처: https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessa
+    </code></pre>    
 3. 프로세스 생성
     1) 1단계 STARTUPINFO 구조체 변수의 생성 및 초기화
-<pre><code>
-typedef struct _STARTUPINFOA {
-  DWORD  cb;              // 구조체 변수의 크기(버전 관리)
-  LPSTR  lpReserved;
-  LPSTR  lpDesktop;
-  LPSTR  lpTitle;         // 콘솔 윈도우의 타이틀 바 제목
-  DWORD  dwX;             // 프로세스 윈도우의 X 좌표
-  DWORD  dwY;             // Y 좌표
-  DWORD  dwXSize;         // 가로 길이
-  DWORD  dwYSize;         // 세로 길이
-  DWORD  dwXCountChars;
-  DWORD  dwYCountChars;
-  DWORD  dwFillAttribute;
-  DWORD  dwFlags;         // 설정된 멤버의 정보
-  WORD   wShowWindow;
-  WORD   cbReserved2;
-  LPBYTE lpReserved2;
-  HANDLE hStdInput;
-  HANDLE hStdOutput;
-  HANDLE hStdError;
-} STARTUPINFOA, *LPSTARTUPINFOA;
-* 출처: https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfoa
-</code></pre>
+
+    <pre><code>
+    typedef struct _STARTUPINFOA {
+      DWORD  cb;              // 구조체 변수의 크기(버전 관리)
+      LPSTR  lpReserved;
+      LPSTR  lpDesktop;
+      LPSTR  lpTitle;         // 콘솔 윈도우의 타이틀 바 제목
+      DWORD  dwX;             // 프로세스 윈도우의 X 좌표
+      DWORD  dwY;             // Y 좌표
+      DWORD  dwXSize;         // 가로 길이
+      DWORD  dwYSize;         // 세로 길이
+      DWORD  dwXCountChars;
+      DWORD  dwYCountChars;
+      DWORD  dwFillAttribute;
+      DWORD  dwFlags;         // 설정된 멤버의 정보
+      WORD   wShowWindow;
+      WORD   cbReserved2;
+      LPBYTE lpReserved2;
+      HANDLE hStdInput;
+      HANDLE hStdOutput;
+      HANDLE hStdError;
+    } STARTUPINFOA, *LPSTARTUPINFOA;
+    * 출처: https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfoa
+    </code></pre>
+
     2) 2 단계: 현재 디렉터리의 설정
         * 일반적으로 프로세스가 생성되면 프로세스의 현재 디렉터리는 프로세스의 실행파일이 존재하는 디렉터리로 설정한다.
         * GetCurrentDirectory, SetCurrentDirectory 함수
-<pre><code>
-DWORD GetCurrentDirectory(
-  DWORD  nBufferLength,
-  LPTSTR lpBuffer
-);
-BOOL SetCurrentDirectory(
-  LPCTSTR lpPathName
-);
-* 출처: https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-getcurrentdirectory, 
-https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setcurrentdirectory
-</code></pre>
-    
+        <pre><code>
+        DWORD GetCurrentDirectory(
+          DWORD  nBufferLength,
+          LPTSTR lpBuffer
+        );
+        BOOL SetCurrentDirectory(
+          LPCTSTR lpPathName
+        );
+        * 출처: https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-getcurrentdirectory, 
+        https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setcurrentdirectory
+        </code></pre>
+
   3) 3 단계: CreateProcess 함수 호출
