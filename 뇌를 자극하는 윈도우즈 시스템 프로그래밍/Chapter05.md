@@ -56,7 +56,6 @@
     </code></pre>    
 3. 프로세스 생성
     1) 1단계 STARTUPINFO 구조체 변수의 생성 및 초기화
-
     <pre><code>
     typedef struct _STARTUPINFOA {
       DWORD  cb;              // 구조체 변수의 크기(버전 관리)
@@ -80,7 +79,6 @@
     } STARTUPINFOA, *LPSTARTUPINFOA;
     * 출처: https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfoa
     </code></pre>
-
     2) 2 단계: 현재 디렉터리의 설정
         * 일반적으로 프로세스가 생성되면 프로세스의 현재 디렉터리는 프로세스의 실행파일이 존재하는 디렉터리로 설정한다.
         * GetCurrentDirectory, SetCurrentDirectory 함수
@@ -95,5 +93,32 @@
         * 출처: https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-getcurrentdirectory, 
         https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setcurrentdirectory
         </code></pre>
+    3) 3 단계: CreateProcess 함수 호출한다. 
+        * 예시: calculator.exe라는 프로세스를 생성 시 (+명령행 인자에 1, 2입력)
+    <pre><code>
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    // si, pi 초기화...
+    bool isCreated = CreateProcess(
+        NULL, "calculator.exe 1 2",
+        NULL, NULL,
+        TRUE,   // 핸들 테이블 상속
+        CREATE_NEW_CONSOLE,
+        NULL, NULL,
+        &si,
+        &pi);
+    </code></pre>
+    * CreateProcess 함수 2번째 인자에서 실행파일에 해당하는 "calculator.exe"는 **표준 검색경로** 순서대로 찾게 된다.
+    * 표준 검색경로
 
-  3) 3 단계: CreateProcess 함수 호출
+        1. 실행파일이 존재하는 디렉터리
+        2. 프로세스의 현재 디렉터리
+        3. Windows 시스템 디렉터리
+        4. Windows 디렉터리
+        5. 환경변수 PATH에 의해 지정된 디렉터리
+
+## Section05 프로세스 생성과 예제 그리고 문제점
+* 생략
+
+## Section06 명령 프롬프트 프로젝트 기능 추가
+* 링크: (TODO: 추가할 것)
