@@ -174,12 +174,13 @@ default:        // 002710DFh
     break;
 }
 /////////////////////// 메모리 저장 값
-// 271128h
+// 271128h (Jump table2)
 0x00271128  00 05 05 05     ; 0: case 1 분기에 대한 Index (271110h 메모리 저장 값과 매칭)
 0x0027112C  01 02 05 05     ; 1: case 5 Index, 2: case 6 Index
 0x00271130  05 03 05 05     ; 3: case 10 Index
 0x00271134  05 05 04 3b     ; 4: case 15 Index
-// 271110h
+
+// 271110h (Jump table1)
 0x00271110  c7 10 27 00     ; case 1 번지 
 0x00271114  bf 10 27 00     ; case 5 번지
 0x00271118  cf 10 27 00     ; case 6 번지
@@ -187,8 +188,7 @@ default:        // 002710DFh
 0x00271120  d7 10 27 00     ; case 15 번지
 0x00271124  df 10 27 00     ; default 번지
 </code></pre>
-* 결과: 
+* 결과: case x에서 x 최대 값  - x 최소 값만큼 Jump table2를 생성하여 (x - x 최소값) 값에 해당하는 자리에 case 순서를 저장한다. 이후 저장된 값을 사용하여 **Case1, Case2**와 같이 Jump table1의 Index로 사용하여 해당 case 번지로 분기한다.
 
-
-## if 문
-### 
+## 고찰
+1. **Case1 혹은 Case2**와 같이 switch 문을 구성하는 것이 가장 효율적이다.
