@@ -14,41 +14,28 @@ scanf("%d", &input);
 switch (input)
 00DF1091  mov         ecx,dword ptr [input]              
 00DF1094  mov         dword ptr [ebp-0Ch],ecx  
-00DF1097  mov         edx,dword ptr [ebp-0Ch]     ; edx = input; (input 값)
-00DF109A  sub         edx,1                       ; edx--;
+00DF1097  mov         edx,dword ptr [ebp-0Ch]    
+00DF109A  sub         edx,1                       ; edx = input - 1;
 00DF109D  mov         dword ptr [ebp-0Ch],edx     
-00DF10A0  cmp         dword ptr [ebp-0Ch],3       ; (input - 1) > 3이면 
-00DF10A4  ja          $LN7+8h (0DF10D0h)          ; 0DF10D0h로 분기 (0DF10D0h은 default 조건)
+00DF10A0  cmp         dword ptr [ebp-0Ch],3       
+00DF10A4  ja          $LN7+8h (0DF10D0h)          ; (input - 1) > 3이면 default 조건(0DF10D0h)으로 분기
 00DF10A6  mov         eax,dword ptr [ebp-0Ch]     ; eax = input - 1;
 00DF10A9  jmp         dword ptr [eax*4+0DF1104h]  ; [0DF1104h + (input - 1) * 4] 주소에 저장된 값으로 분기 (해당 번지 저장 값은 아래 명시)
 {
-case 1:
+case 1:         // 00DF10B0h
     output = input;
-00DF10B0  mov         ecx,dword ptr [input]  
-00DF10B3  mov         dword ptr [output],ecx  
-    break;
-00DF10B6  jmp         $LN7+0Fh (0DF10D7h)  
-case 2:
+    break; 
+case 2:         // 00DF10B8h
+    output = input; 
+    break; 
+case 3:         // 00DF10C0h
     output = input;
-00DF10B8  mov         edx,dword ptr [input]  
-00DF10BB  mov         dword ptr [output],edx  
     break;
-00DF10BE  jmp         $LN7+0Fh (0DF10D7h)  
-case 3:
+case 4:         // 00DF10C8h
     output = input;
-00DF10C0  mov         eax,dword ptr [input]  
-00DF10C3  mov         dword ptr [output],eax  
     break;
-00DF10C6  jmp         $LN7+0Fh (0DF10D7h)  
-case 4:
-    output = input;
-00DF10C8  mov         ecx,dword ptr [input]  
-00DF10CB  mov         dword ptr [output],ecx  
-    break;
-00DF10CE  jmp         $LN7+0Fh (0DF10D7h)  
-default:
+default:        // 00DF10D0h
     output = 0xFF;
-00DF10D0  mov         dword ptr [output],0FFh  
     break;
 }
   
@@ -76,38 +63,25 @@ switch (input)
 007E1097  mov         edx,dword ptr [ebp-0Ch]  
 007E109A  sub         edx,1                         ; edx = input - 1;
 007E109D  mov         dword ptr [ebp-0Ch],edx
-007E10A0  cmp         dword ptr [ebp-0Ch],3         ; (input - 1) > 3이면 
-007E10A4  ja          $LN7+8h (07E10D0h)            ; 07E10D0h로 분기(default 조건)
+007E10A0  cmp         dword ptr [ebp-0Ch],3         ; 
+007E10A4  ja          $LN7+8h (07E10D0h)            ; (input - 1) > 3이면 default 조건(07E10D0h)로 분기
 007E10A6  mov         eax,dword ptr [ebp-0Ch]       ; eax = input - 1;
 007E10A9  jmp         dword ptr [eax*4+7E1104h]     ; [7E1104h + (input - 1) * 4] 주소에 저장된 값으로 분기 (해당 번지 저장 값은 아래 명시)
 {
-case 4:
+case 4:     // 007E10B0
     output = input;
-007E10B0  mov         ecx,dword ptr [input]  
-007E10B3  mov         dword ptr [output],ecx  
-    break;
-007E10B6  jmp         $LN7+0Fh (07E10D7h)  
-case 3:
+    break;  
+case 3:     // 007E10B8
     output = input;
-007E10B8  mov         edx,dword ptr [input]  
-007E10BB  mov         dword ptr [output],edx  
     break;
-007E10BE  jmp         $LN7+0Fh (07E10D7h)  
-case 2:
+case 2:     // 007E10C0
     output = input;
-007E10C0  mov         eax,dword ptr [input]  
-007E10C3  mov         dword ptr [output],eax  
     break;
-007E10C6  jmp         $LN7+0Fh (07E10D7h)  
-case 1:
+case 1:     // 007E10C8
     output = input;
-007E10C8  mov         ecx,dword ptr [input]  
-007E10CB  mov         dword ptr [output],ecx  
     break;
-007E10CE  jmp         $LN7+0Fh (07E10D7h)  
-default:
+default:    // 007E10D0
     output = 0xFF;
-007E10D0  mov         dword ptr [output],0FFh  
     break;
 }
 
@@ -128,110 +102,93 @@ switch (input)
 00EA1091  mov         ecx,dword ptr [input]  
 00EA1094  mov         dword ptr [ebp-0Ch],ecx  
 00EA1097  cmp         dword ptr [ebp-0Ch],3E8h      
-00EA109E  jg          main+47h (0EA10B7h)       ; input > 0x3E8 이면 0EA10B7로 분기
+00EA109E  jg          main+47h (0EA10B7h)       ; input > 1000 이면 0EA10B7로 분기
 00EA10A0  cmp         dword ptr [ebp-0Ch],3E8h  
-00EA10A7  je          main+62h (0EA10D2h)       ; input == 0x3E8 이면 case 1000(0EA10D2h)으로 분기
+00EA10A7  je          main+62h (0EA10D2h)       ; input == 1000 이면 case 1000(0EA10D2h)으로 분기
 00EA10A9  cmp         dword ptr [ebp-0Ch],32h  
-00EA10AD  je          main+52h (0EA10C2h)       ; input == 0x32 이면 case 50(0EA10C2h)으로 분기
+00EA10AD  je          main+52h (0EA10C2h)       ; input == 50 이면 case 50(0EA10C2h)으로 분기
 00EA10AF  cmp         dword ptr [ebp-0Ch],64h  
-00EA10B3  je          main+5Ah (0EA10CAh)       ; input == 0x64 이면 case 100(0EA10CAh)으로 분기
+00EA10B3  je          main+5Ah (0EA10CAh)       ; input == 100 이면 case 100(0EA10CAh)으로 분기
 00EA10B5  jmp         main+72h (0EA10E2h)       ; default로 분기
 00EA10B7  cmp         dword ptr [ebp-0Ch],7D0h  
-00EA10BE  je          main+6Ah (0EA10DAh)       ; input == 0x7D0h 이면 case 2000(0EA10DAh)으로 분기
+00EA10BE  je          main+6Ah (0EA10DAh)       ; input == 2000 이면 case 2000(0EA10DAh)으로 분기
 00EA10C0  jmp         main+72h (0EA10E2h)       ; default로 분기
 {
-case 50:
-    output = input;
-00EA10C2  mov         edx,dword ptr [input]  
-00EA10C5  mov         dword ptr [output],edx  
+case 50:        // 00EA10C2
+    output = input; 
     break;
-00EA10C8  jmp         main+79h (0EA10E9h)  
-case 100:
+case 100:       // 00EA10CA
     output = input;
-00EA10CA  mov         eax,dword ptr [input]  
-00EA10CD  mov         dword ptr [output],eax  
     break;
-00EA10D0  jmp         main+79h (0EA10E9h)  
-case 1000:
+case 1000:      // 00EA10D2
     output = input;
-00EA10D2  mov         ecx,dword ptr [input]  
-00EA10D5  mov         dword ptr [output],ecx  
     break;
-00EA10D8  jmp         main+79h (0EA10E9h)  
-case 2000:
+case 2000:      // 00EA10DA
     output = input;
-00EA10DA  mov         edx,dword ptr [input]  
-00EA10DD  mov         dword ptr [output],edx  
     break;
-00EA10E0  jmp         main+79h (0EA10E9h)  
-default:
+default:        // 00EA10E2
     output = 0xFF;
-00EA10E2  mov         dword ptr [output],0FFh  
     break;
 }
 </code></pre>
 * 결과: Jump 테이블이 생성되지 않고 input 값을 일일히 비교하여 해당 case로 분기한다.
 ### Case 4 - case의 무작위 정렬
 <pre><code>	
+/////////////////////// 코드
+int input;
+int output;
+
+scanf("%d", &input);
+
 switch (input)
-00B71091  mov         ecx,dword ptr [input]  
-00B71094  mov         dword ptr [ebp-0Ch],ecx  
-00B71097  cmp         dword ptr [ebp-0Ch],64h  
-00B7109B  jg          main+57h (0B710C7h)       ; input > 100 이면 0B710C7h로 분기
-00B7109D  cmp         dword ptr [ebp-0Ch],64h  
-00B710A1  je          main+0A0h (0B71110h)      ; input == 100 이면 case 100(0B71110h)으로 분기
-00B710A3  mov         edx,dword ptr [ebp-0Ch]  
-00B710A6  sub         edx,4                     ; edx = input - 4;
-00B710A9  mov         dword ptr [ebp-0Ch],edx  
-00B710AC  cmp         dword ptr [ebp-0Ch],2Eh  
-00B710B0  ja          $LN13 (0B71140h)          ; (input - 4) > 46 이면 default 조건(0B71140h)으로 분기
-00B710B6  mov         eax,dword ptr [ebp-0Ch]  
-00B710B9  movzx       ecx,byte ptr [eax+0B71188h]  
-00B710C0  jmp         dword ptr [ecx*4+0B71174h]  
-00B710C7  cmp         dword ptr [ebp-0Ch],3E8h  
-00B710CE  jg          main+7Dh (0B710EDh)       ; (input - 4) > 1000 이면 0B710EDh로 분기
-00B710D0  cmp         dword ptr [ebp-0Ch],3E8h  
-00B710D7  je          main+98h (0B71108h)       ; (input - 4) == 1000 이면 case 1000(0B71108h)으로 분기
-00B710D9  cmp         dword ptr [ebp-0Ch],0C8h  
-00B710E0  je          main+0B0h (0B71120h)      ; (input - 4) == 200 이면 case 200(0B71120h)으로 분기
-00B710E2  cmp         dword ptr [ebp-0Ch],320h  
-00B710E9  je          main+0A8h (0B71118h)      ; (input - 4) == 800 이면 case 800(0B71118h)으로 분기
-00B710EB  jmp         $LN13 (0B71140h)          ; default 조건(0B71140h)으로 분기
-00B710ED  cmp         dword ptr [ebp-0Ch],7D0h  
-00B710F4  je          main+88h (0B710F8h)       ; (input - 4) == 2000 이면 case 2000(0B710F8h)으로 분기
-00B710F6  jmp         $LN13 (0B71140h)          ; default 조건(0B71140h)으로 분기
+00271091  mov         ecx,dword ptr [input]  
+00271094  mov         dword ptr [ebp-10h],ecx  
+00271097  mov         edx,dword ptr [ebp-10h]  
+0027109A  sub         edx,1                         ; edx = input - 1;
+0027109D  mov         dword ptr [ebp-10h],edx  
+002710A0  cmp         dword ptr [ebp-10h],0Eh  
+002710A4  ja          $LN9 (02710DFh)               ; (input - 1) > 14이면 default 조건(02710DFh)로 분기
+002710A6  mov         eax,dword ptr [ebp-10h]  
+002710A9  movzx       ecx,byte ptr [eax+271128h]    ; ecx = [271128h + (input - 1)](단, 1byte만큼 접근) => [addr]: addr 번지에 저장된 값
+                                                    ; 271128h 번지에 저장된 데이터 아래 명시
+002710B0  jmp         dword ptr [ecx*4+271110h]     ; [271110h + ecx * 4]로 분기
+                                                    ; 271110h 번지에 저장된 데이터 아래 명시
 {
-case 2000:      // 00B710F8h
+case 10:        // 002710B7h
     output = input;
     break;
-case 50:        // 00B71100h
-    output = input;
-    break;
-case 1000:      // 00B71108h
+case 5:         // 002710BFh
     output = input;
     break; 
-case 100:       // 00B71110h
-    output = input;
-    break; 
-case 800:       // 00B71118h
+case 1:         // 002710C7h
     output = input;
     break;
-case 200:       // 00B71120h
-    output = input; 
-    break;
-case 4:         // 00B71128h
+case 6:         // 002710CFh
     output = input;
     break;
-case 5:         // 00B71130h
+case 15:        // 002710D7h
     output = input;
     break;
-case 7:         // 00B71138h
+default:        // 002710DFh
     output = input;
-    break;
-default:        // 00B71140h
-    output = 0xFF; 
     break;
 }
+/////////////////////// 메모리 저장 값
+// 271128h
+0x00271128  00 05 05 05     ; 0: case 1 분기에 대한 Index (271110h 메모리 저장 값과 매칭)
+0x0027112C  01 02 05 05     ; 1: case 5 Index, 2: case 6 Index
+0x00271130  05 03 05 05     ; 3: case 10 Index
+0x00271134  05 05 04 3b     ; 4: case 15 Index
+// 271110h
+0x00271110  c7 10 27 00     ; case 1 번지 
+0x00271114  bf 10 27 00     ; case 5 번지
+0x00271118  cf 10 27 00     ; case 6 번지
+0x0027111C  b7 10 27 00     ; case 10 번지
+0x00271120  d7 10 27 00     ; case 15 번지
+0x00271124  df 10 27 00     ; default 번지
 </code></pre>
+* 결과: 
+
+
 ## if 문
 ### 
