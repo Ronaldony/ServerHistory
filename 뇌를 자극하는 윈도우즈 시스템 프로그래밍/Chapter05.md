@@ -94,8 +94,8 @@
         https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setcurrentdirectory
         </code></pre>
     3) 3 단계: CreateProcess 함수 호출한다. 
-        * 예시: calculator.exe라는 프로세스를 생성 시 (+명령행 인자에 1, 2입력)
     <pre><code>
+    * 예시: calculator.exe라는 프로세스를 생성 시 (+명령행 인자에 1, 2입력)
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
     // si, pi 초기화...
