@@ -35,6 +35,21 @@
 1. 핸들은 OS가 아닌 **프로세스**에 종속적이다. 이에 대한 내용은 Chapter08에서 자세히 다룬다.
 
 ### 에제를 통한 종속 관계 이해 (예제1)
-* 본 책의 예제를 일부 변경하여 커널 오브젝트 접근에 관한 내용을 설명하고자 하였습니다.
-* 자료 경로: Chapter06_src/예제1
+* 본 책의 예제를 일부 변경하여 커널 오브젝트 접근에 관한 내용을 설명하고자 하였다. (자료 경로: Chapter06_src/예제1)
+* 본 예제를 통하여 커널 오브젝트가 프로세스가 아닌 OS에 종속적인 관계라는 것을 알 수 있다.
 
+### PROCESS_INFORMATION 구조체
+1. 구조체 구성
+<pre><code>
+typedef struct _PROCESS_INFORMATION {
+  HANDLE hProcess;          // 프로세스 핸들(커널 오브젝트를 구분하기 위한 값)
+  HANDLE hThread;           // 쓰레드 핸들
+  DWORD  dwProcessId;       // 프로세스 ID (프로세스 자체를 구분하기 위한 값)
+  DWORD  dwThreadId;        // 쓰레드 ID
+} PROCESS_INFORMATION, *PPROCESS_INFORMATION, *LPPROCESS_INFORMATION;
+</code></pre>
+    * 출처: https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information
+
+## Section03 커널 오브젝트와 Usage Count
+* 커널 오브젝트의 생성 주체는 프로세스가 아닌 "OS"이며 소멸주기 또한 생성의 주체인 "OS"가 결정한다.
+### CloseHandle 함수에 대한 정확한 이해
