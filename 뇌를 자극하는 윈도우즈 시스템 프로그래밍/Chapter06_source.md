@@ -1,0 +1,51 @@
+# 챕터6 예제
+## 예제 1
+1. 소스
+    1) Operation1.cpp
+    <pre><code>
+    INT _tmain(int argc, LPTSTR argv[]) {
+        STARTUPINFO si = { 0, };
+        PROCESS_INFORMATION pi;
+        si.cb = sizeof(si);
+
+        TCHAR command[] = _T("Operation2.exe");
+
+        // "Operation2.exe" 자식 프로세스 생성
+        (void)CreateProcess(       
+            NULL, command, NULL, NULL,
+            TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi
+        );
+
+        _fputts(_T("Operation1.exe\n"), stdout);
+        rewind(stdin);
+        getchar();		// 잠시 정지하기 위한 버퍼 입력
+
+        UINT exitCode = 0;
+        bool state = TerminateProcess(pi.hProcess, exitCode);	// 자식프로세스의 핸들을 이용하여 Operation2 프로세스 강제 종료
+
+        rewind(stdin);
+        getchar();
+
+        return 0;
+    }
+    </code></pre>
+    2) Operation2.cpp
+    <pre><code>
+    INT _tmain(int argc, LPTSTR argv[]) {
+        while (1)
+        {
+            for (DWORD i = 0; i < 1000; i++)
+            {
+                for (DWORD i = 0; i < 10000; i++);
+            }
+            _fputts(_T("Operation2.exe\n"), stdout);    // 연속적으로 "Operation2.exe" 출력
+        }
+	return 0;
+    }
+    </code></pre>
+2. 실행 절차
+    1) 두 .cpp 파일을 빌드하여 각각 Operation1.exe, Operation2.exe 이름으로 지정한다.
+    2) Operation1.exe를 실행한 후 Operation2.exe가 새로운 창에서 실행되는 것을 확인한다.
+    3) Operation1.exe 창에서 Enter를 입력한다.
+3. 결과: Operation2.exe가 종료된다.
+4. 분석: 부모 프로세스 Operation1이 자식 프로세스 Operation2의 핸들을 사용하여 Operation2 프로세스 오브젝트를 **간접적으로 조작**하는 것을 확인할 수 있다.
