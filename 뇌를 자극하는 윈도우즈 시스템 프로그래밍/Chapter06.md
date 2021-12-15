@@ -15,9 +15,8 @@
 2. 핸들 or 오브젝트 핸들: 커널 오브젝트 생성 시 프로그래머에게 부여되는 커널 오브젝트 할당 정수값 번호. 이 번호로 원하는 커널 오브젝트에 접근하여 간접적 조작을 할 수 있다.
     * 핸들-오브젝트-리소스의 관계
     <img width="500" src="https://user-images.githubusercontent.com/95362065/146154142-07d0d53d-c339-44f8-8b75-6766385032ec.png">
-3. SetPriorityClass 함수
+3. 핸들을 사용하여 프로세스의 우선순위를 변경시키는 함수
     1) BOOL SetPriorityClass(HANDLE, DWORD)
-        * 프로세스의 우선순위를 변경시키는 함수
 
 ### CPU 점유권
 1. 함수가 호출되는 중간에도 CPU의 점유권은 다른 프로세스에게 넘어갈 수 있다.
@@ -48,8 +47,20 @@ typedef struct _PROCESS_INFORMATION {
   DWORD  dwThreadId;        // 쓰레드 ID
 } PROCESS_INFORMATION, *PPROCESS_INFORMATION, *LPPROCESS_INFORMATION;
 </code></pre>
-    * 출처: https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information
+ * 출처: https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information
 
 ## Section03 커널 오브젝트와 Usage Count
 * 커널 오브젝트의 생성 주체는 프로세스가 아닌 "OS"이며 소멸주기 또한 생성의 주체인 "OS"가 결정한다.
 ### CloseHandle 함수에 대한 정확한 이해
+1. 프로세스가 소멸된다고 해서 커널 오브젝트가 소멸되지는 않는다. 커널 오브젝트의 소멸하는 시점은 Usage Count가 0이 되는 순간이다.
+    * Usage Count: 커널 오브젝트 내부에 존재하는 데이터로서 해당 커널 오브젝트가 참조되고있는 회수
+2. CloseHandle 함수
+    1) BOOL CloseHandle(HANDLE): HANDLE에 해당하는 커널 오브젝트의 Usage Count를 -1 시키고, 핸들 테이블에서 해당 핸들 번호를 삭제한다.
+    2) 오해: 재차 언급되지만 CloseHandle은 리소스와 커널 오브젝트를 소멸시키는 것이 아니다!
+
+### CloseHanadle 함수와 프로세스 종료코드
+1. 프로세스가 종료되면 프로세스는 종료코드를 반환하는데 이 종료코드는 커널 오브젝트에 저장된다.
+2. 종료코드 관련 함수
+    1) BOOL GetExitCodeProcess(HANDLE, LPDWORD): HANDLE에 해당하는 프로세스의 **종료코드**를 LPDWORD로 반환받는다.
+        * 해당 함수는 즉시 반환하며(넌블로킹), 해당 프로세스가 종료되지 않은 경우 STILL_ALIVE를 종료코드로 반환한다.
+    2) exit(int const): 프로세스를 강제로 종료시킨다. int const에 입력한 값으로 **종료코드**가 프로세스 오브젝트에 저장된다.
