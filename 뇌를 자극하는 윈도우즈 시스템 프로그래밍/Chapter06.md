@@ -58,9 +58,10 @@ typedef struct _PROCESS_INFORMATION {
     1) BOOL CloseHandle(HANDLE): HANDLE에 해당하는 커널 오브젝트의 Usage Count를 -1 시키고, 핸들 테이블에서 해당 핸들 번호를 삭제한다.
     2) 오해: 재차 언급되지만 CloseHandle은 리소스와 커널 오브젝트를 소멸시키는 것이 아니다!
 
-### CloseHanadle 함수와 프로세스 종료코드
-1. 프로세스가 종료되면 프로세스는 종료코드를 반환하는데 이 종료코드는 커널 오브젝트에 저장된다.
-2. 종료코드 관련 함수
+### CloseHanadle 함수와 프로세스 종료코드 
+1. 종료코드: 프로세스가 종료되며 반환하는 값. 종료 코드를 반환하는 기능엔 exit(), ExitProcess(), 메인 함수에서의 return 등이 있다. 
+2. 프로세스가 종료되면 종료코드는 종료된 프로세스의 커널 오브젝트에 저장된다.
+3. 종료코드 관련 함수
     1) BOOL GetExitCodeProcess(HANDLE, LPDWORD): HANDLE에 해당하는 프로세스의 **종료코드**를 LPDWORD로 반환받는다.
-        * 해당 함수는 즉시 반환하며(넌블로킹), 해당 프로세스가 종료되지 않은 경우 STILL_ALIVE를 종료코드로 반환한다.
+        * 해당 함수는 즉시 반환하며(넌블로킹), HANDLE에 해당하는 프로세스가 종료되지 않은 경우 STILL_ALIVE를 종료코드로 반환한다.
     2) exit(int const): 프로세스를 강제로 종료시킨다. int const에 입력한 값으로 **종료코드**가 프로세스 오브젝트에 저장된다.
