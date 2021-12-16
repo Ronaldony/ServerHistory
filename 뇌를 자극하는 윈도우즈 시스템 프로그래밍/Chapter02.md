@@ -26,6 +26,7 @@
 	2) WBCS 기반 문자열 조작 함수
 		* 참조: https://makersweb.net/cpp/1394
 		* 안전 문자열 함수에서 문자 사이즈에 대한 내용(TODO: 유니코드 기반으로 작성된 안전 문자열 함수 사용 시 버퍼 크기 입력에 관한 내용 추가)
+
 ## Section02 MBCS와 WBCS의 동시 지원
 1. #include <windows.h>
 	1) windows.h: Windows 기반 프로그래밍 시 기본적으로 항상 포함되어야 하는 헤더 파일이다.
@@ -53,6 +54,6 @@
 		</pre>
 		</code>
 	2) Visual Studio에서는 기본적으로 전처리기 옵션에서 UNICODE, _UNICODE를 정의하고 있다.
-4. MBCS와 WBCS를 동시에 지원하기 위한 함수들
+3. MBCS와 WBCS를 동시에 지원하기 위한 함수들
 	1) tchar.h에는 MBCS와 WBCS를 동시에 수용하는 프로그램을 위한 함수들을 제공한다.
 	* 참조: https://blog.naver.com/PostView.naver?blogId=feelwoo&logNo=100036707000&parentCategoryNo=&categoryNo=12&viewDate=&isShowPopularPosts=true&from=search
