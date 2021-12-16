@@ -54,7 +54,7 @@ typedef struct _PROCESS_INFORMATION {
 ### CloseHandle 함수에 대한 정확한 이해
 1. 프로세스가 소멸된다고 해서 커널 오브젝트가 소멸되지는 않는다. 커널 오브젝트의 소멸하는 시점은 Usage Count가 0이 되는 순간이다.
     * Usage Count: 커널 오브젝트 내부에 존재하는 데이터로서 해당 커널 오브젝트가 참조되고있는 회수
-2. CloseHandle 함수
+2. CloseHandle 함수 
     1) BOOL CloseHandle(HANDLE): HANDLE에 해당하는 커널 오브젝트의 Usage Count를 -1 시키고, 핸들 테이블에서 해당 핸들 번호를 삭제한다.
     2) 오해: 재차 언급되지만 CloseHandle은 리소스와 커널 오브젝트를 소멸시키는 것이 아니다!
 
@@ -65,3 +65,8 @@ typedef struct _PROCESS_INFORMATION {
     1) BOOL GetExitCodeProcess(HANDLE, LPDWORD): HANDLE에 해당하는 프로세스의 **종료코드**를 LPDWORD로 반환받는다.
         * 해당 함수는 즉시 반환하며(넌블로킹), HANDLE에 해당하는 프로세스가 종료되지 않은 경우 STILL_ALIVE를 종료코드로 반환한다.
     2) exit(int const): 프로세스를 강제로 종료시킨다. int const에 입력한 값으로 **종료코드**가 프로세스 오브젝트에 저장된다.
+
+### 커널 오브젝트와 Usage Count
+1.
+
+2. 프로세스가 종료되면 종료코드는 종료된 프로세스의 커널 오브젝트에 저장된다.
