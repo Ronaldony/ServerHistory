@@ -75,4 +75,4 @@ typedef struct _PROCESS_INFORMATION {
 
 ##Section04 명령 프롬프트 프로젝트 기능 추가
 * 구현 내용: Chapter05에서 구현한 기능에 더하여 "start", "echo"명령을 추가한다.
-* 코드 파일 경로: Chapter06_src/prompt06
+* 코드 파일 경로: Pompt_prj/prompt06
