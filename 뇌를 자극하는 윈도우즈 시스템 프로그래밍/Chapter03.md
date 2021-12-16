@@ -49,4 +49,4 @@ int main(void)
 
 ### 명령 프롬프트 프로젝트의 제안과 EXIT 명령어의 구현
 * 구현 내용: 명령 프롬프트에서 "exit" 기능 구현
-* 코드 파일 경로: Chapter03_src/prompt03
+* 코드 파일 경로: Pompt_prj/prompt03
