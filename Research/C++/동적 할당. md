@@ -1,0 +1,48 @@
+# 메모리 동적할당
+## malloc
+### Debug 모드에서의 malloc
+<pre><code>
+///////////////////////////////////////// main 함수 내부
+	char* ch = (char*)malloc(sizeof(char) * 20);
+007A5705  mov         esi,esp                                   ; esi에 esip를 왜 넣는 것일까?
+007A5707  push        14h                                       ; 요청 할당 크기
+007A5709  call        dword ptr [__imp__malloc (07AB188h)]      ; malloc 호출
+007A570F  add         esp,4  
+007A5712  cmp         esi,esp                                   ; 복구된 esi와 esp 비교
+007A5714  call        __RTC_CheckEsp (07A1299h)                 ; esp 체크(스택 포인터 검사) 
+007A5719  mov         dword ptr [ch],eax  
+
+///////////////////////////////////////// dword ptr [__imp__malloc (07AB188h)] 내부
+56C4EDC0  mov         edi,edi  
+56C4EDC2  push        ebp                                       ; ebp 스택 저장 (main 함수 ebp 복구를 위해)
+56C4EDC3  mov         ebp,esp  
+56C4EDC5  push        0  
+56C4EDC7  push        0  
+56C4EDC9  push        1  
+56C4EDCB  mov         eax,dword ptr [size]                      ; size는 main에서 push된 할당 크기 20이다
+56C4EDCE  push        eax  
+56C4EDCF  call        _malloc_dbg (56C4E4A0h)                   ; 파라미터로 왼쪽 순서대로 size, 1, 0, 0이 입려됨
+56C4EDD4  add         esp,10h  
+56C4EDD7  pop         ebp  
+56C4EDD8  ret  
+
+///////////////////////////////////////// _malloc_dbg (56C4E4A0h)
+56C4E4A0  mov         edi,edi  
+56C4E4A2  push        ebp  
+56C4E4A3  mov         ebp,esp  
+56C4E4A5  mov         eax,dword ptr [line_number]  
+56C4E4A8  push        eax  
+56C4E4A9  mov         ecx,dword ptr [file_name]  
+56C4E4AC  push        ecx  
+56C4E4AD  mov         edx,dword ptr [block_use]  
+56C4E4B0  push        edx  
+56C4E4B1  mov         eax,dword ptr [size]  
+56C4E4B4  push        eax  
+56C4E4B5  call        heap_alloc_dbg (56C4BD10h)  
+56C4E4BA  add         esp,10h  
+56C4E4BD  pop         ebp  
+56C4E4BE  ret  
+
+</code></pre>
+
+### Release 모드에서의 malloc
