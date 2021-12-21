@@ -73,6 +73,6 @@ typedef struct _PROCESS_INFORMATION {
     * <img width="500" src="https://user-images.githubusercontent.com/95362065/146329864-936b749f-0119-47cd-a80d-f0fe91f02cda.png">
     * 일반적으로 부모프로세스는 자식 프로세스를 생성한 뒤 CloseHandle 함수를 호출하여 자식 프로세스의 핸들 번호를 반환한다.
 
-##Section04 명령 프롬프트 프로젝트 기능 추가
+## Section04 명령 프롬프트 프로젝트 기능 추가
 * 구현 내용: Chapter05에서 구현한 기능에 더하여 "start", "echo"명령을 추가한다.
 * 코드 파일 경로: prj_prompt/chapter06
