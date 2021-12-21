@@ -80,4 +80,106 @@
 
 ## Section02 파이프 방식의 IPC
 ### 메일슬롯에 대한 회고와 파이프의 이해
-1. 
+1. 메일슬롯은 서로 관련이 없는 프로세스들(부모 자식이 아닌)간에 통신 시 유용하다.
+2. 파이프는 Nameed 파이프, Anonymous 파이프 두 가지가 있다.
+3. 메일슬롯과 파이프 비교
+    1) 메일슬롯 :           브로드캐스트 방식, 단방향 통신(Send->Receiver), 프로세스 부모 자식 관계 상관없는 통신(주소를 이용한 통신)
+    2) Anonymous 파이프:   단방향 통신, 부모 자식 프로세스간에 통신
+    3) Named 파이프:       양방향 통신, 프로세스 부모 자식 관계 상관없는 통신(주소를 이용한 통신)
+
+### Anonymous 파이프
+1. 함수
+    1) Anonymous 파이프 생성
+        <pre><code>
+        BOOL CreatePipe(
+            PHANDLE               hReadPipe,            // 읽기 파이프 핸들 저장 주소
+            PHANDLE               hWritePipe,           // 쓰기 파이프 핸들 저장 주소
+            LPSECURITY_ATTRIBUTES lpPipeAttributes,     // 보안 속성
+            DWORD                 nSize                 // 파이프의 버퍼 사이즈(0 입력 시 디폴트 버퍼)
+        );
+        * 출처: https://docs.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-createpipe
+        </code></pre>
+    2) 읽기, 쓰기 함수
+        * 파이프 HANDLE을 입력하여 ReadFile, WriteFile 함수로 읽기와 쓰기를 한다.
+
+### Named 파이프
+1. 함수(Server)
+    1) Named 파이프 생성 함수
+        <pre><code>
+        HANDLE CreateNamedPipeW(
+            LPCSTR                lpName,                   // 파이프 이름
+            DWORD                 dwOpenMode,               // 개방 모드(읽기, 쓰기, 읽기쓰기 모두)
+            DWORD                 dwPipeMode,               // 데이터 전송 타입, 데이터 수신 타입, 블로킹 모드를 결정
+            DWORD                 nMaxInstances,            // 생성 파이프 최대 개수(Client 연결 요청 수용 개수)
+            DWORD                 nOutBufferSize,           // 출력 버퍼 사이즈(0: 디폴트)
+            DWORD                 nInBufferSize,            // 입력 버퍼 사이즈(0: 디폴트)
+            DWORD                 nDefaultTimeOut,          // WaitNamedPipe 함수에 적용할 기본 타임-아웃 시간(ms 단위)
+            LPSECURITY_ATTRIBUTES lpSecurityAttributes      // 보안 속성
+        );
+        * 출처: https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createnamedpipea
+        </code></pre>
+    2) 생성된 파이프를 연결 요청 대기 상태 변환
+        <pre><code>
+        BOOL ConnectNamedPipe(              // 설명: 클라이언트의 연결 요청을 수락, 연결 요청이 없는 상태라면 블로킹 됨
+            HANDLE       hNamedPipe,        // CreateNamedPipeA에서 생성된 파이프 핸들
+            LPOVERLAPPED lpOverlapped       // 중첩 I/O 관련 인자(미사용 시 NULL)
+        );
+        * 출처: https://docs.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-connectnamedpipe
+        </code></pre>
+2. 함수(Client)
+    1) Named 파이프에 연결 요청 - CreateFile 함수
+    2) 연결 요청 결과 대기
+        <pre><code>
+        BOOL WaitNamedPipeW(            
+            LPCWSTR lpNamedPipeName,    // Named 파이프 이름(주소)
+            DWORD   nTimeOut            // Server가 연결 요청을 수락할 때까지의 타임-아웃 시간 설정(ms 단위)
+                                        // NMPWAIT_USE_DEFAULT_WAIT로 설정 시 CreateNamedPipeW 함수로 설정한 nDefaultTimeOut 시간으로 설정
+        );
+        * 출처: https://docs.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-waitnamedpipew
+        </code></pre>
+    3) 서버 파이프와의 연결 속성 변경(필요 시)
+        <pre><code>        
+        BOOL SetNamedPipeHandleState(
+            HANDLE  hNamedPipe,             // 변경 시킬 파이프
+            LPDWORD lpMode,                 // 읽기 모드와 함수 리턴방식
+            LPDWORD lpMaxCollectionCount,   // 서버로 데이터를 보내기에 앞서 저장할 버퍼링 크기(Byte 단위)
+            LPDWORD lpCollectDataTimeout    // 버퍼링 최대 허용 시간(ms 단위)
+        );
+        * 출처: https://docs.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-setnamedpipehandlestate
+        </code></pre>
+3. 통신 절차(Server = S, Client = C)
+    1) S: Named 파이프 생성 (CreateNamedPipeW 함수)
+    2) S: Named 파이프 연결 요청 대기 상태 변환(ConnectNamedPipe 함수)
+    3) C: Named 파이프 연결 요청(CreateFile 함수)
+    4) C: 연결 요청 결과 대기(WaitNamedPipeW)
+    5) C: 파이프 연결 속성 변경(SetNamedPipeHandleState 함수), 이 과정은 필요 시
+    6) S-C: 데이터 통신(ReadFile과 WriteFile )
+    7) S: Pipe 연결 끊기(FulshFileBuffers 후 DisconnetNamedPipe 함수 호출)
+
+## Section03 프로세스 환경변수
+### 프로세스 환경변수
+1. 환경변수: 프로세스별로 별도로 저장되는 key-value 문자열 구조의 메모리 공간
+2. 부모는 자식 프로세스에게 환경변수를 **상속**시킬 수 있다.
+3. 함수
+    1) 환경변수 등록
+        <pre><code>
+        BOOL SetEnvironmentVariable(
+            LPCTSTR lpName,     // 등록할 Key
+            LPCTSTR lpValue     // Key에 해당하는 Value
+        );
+        * 출처: https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setenvironmentvariable
+        </code></pre>
+    3) 환경변수 얻기
+        <pre><code>
+        DWORD GetEnvironmentVariable(
+            LPCTSTR lpName,     // Key
+            LPTSTR  lpBuffer,   // Key의 Value를 저장할 버퍼 주소
+            DWORD   nSize       // lpBuffer가 가리키는 메모리 크기
+        );
+        * 반환: lpBuffer에 저장된 문자열 
+        * 출처: https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-getenvironmentvariable
+        </code></pre>
+
+## Section04 명령 프롬프트 프로젝트 기능 추가
+* 구현 내용: Chapter06에서 구현한 기능에 더하여 "현재 실행중인 프로세스 출력(lp)"과 "지정된 프로세스 제거(kp)" 명령을 추가한다.
+* 코드 파일 경로: prj_prompt/chapter08
