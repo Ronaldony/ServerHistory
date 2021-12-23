@@ -76,5 +76,11 @@
         3. Page In혹은 out의 과정
         4. Page default 시 Page In 과정
 2. Heap
-    1. malloc 과정: malloc ->HeapCreate->virtualAlloc->HeapAlloc
+    1. malloc의 내부 힙 할당(HeapCreate->HeapAlloc->HeapDistory)
+    2. VirtualAlloc->VirtualFree
+3. 캐시 메모리
+	1. alignas를 이용한 캐시 히트를 높이는 방법 두 가지
+	2. 캐시 메모리 쓰기 정책(write back, write through)
+	3. 캐시 메모리 특성(RAM으로부터 읽는 크기, 캐시 메모리 내 실제 라인 개수, 데이터 동기화) 
+	4. TLB과 캐시 메모리 N-way의 관계
 ——코드
