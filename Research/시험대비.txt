@@ -1,0 +1,80 @@
+분기 시험 대비
+10월자 복습
+----필기
+1.  2의 보수 계산
+2.  임시 블록 스택 확보 여부 => 스택 영역으로 미리 잡힘
+3.  call과 ret (돌아갈 주소 오염 -> 위치 실행 액세스 위반)
+    1. call: 다음 실행 코드 주소를 stack에 push하고 호출 함수 주소로 Jump
+    2. ret: pop 명령으로 IP에 돌아갈 주소를 저장하고 Jump
+4. 호출 규약
+    1. stdcall,과 cdecl 호츌규약의 차이점
+    2. 스택 정리 주체 피호출자, 호출자 차이점
+    3. 스택 위 매개변수 순서 LTR, RTL 차이점 및 RTL의 장점
+        1. RTL은 파라미터를 가변적으로 받을 수 있다.
+5. 함수 호출 시 Call by value, Call by reference 성능 비교
+    1. 필기에는 value가 더 성능이 좋다고 되어있음
+6. 함수 포인터(배열) 사용 방법
+    1. [반환 자료형] (*func)(매개변수)
+7. 난수
+    1. 난수 발생 과정
+        1. Seed 생성: srand(time()) -> time 값으로 ptd 공간에 seed가 저장됨
+        2. Rand 호출: ptd 공간의 seed를 일정 패턴으로 계산하여 반환
+    2. time 함수
+        1. 1970년 1월1일 0시0분0초부터 현재까지의 시간을 반환
+8. 구조체
+    1. Padding
+        1. 각 요소들의 Padding 규칙과 구조체 전체 크기의 Padding 규칙
+        2. 구조체의 시작 주소는 요소 중 가장 큰 요소의 경계로 메모리가 할당된다.
+9. Alignas
+    1. 구조체, 구조체 요소, 지역변수에 적용하는 경우
+        1. 특히 지역 변수에 적용될 시 Stack이 쌓이는 절차 분석
+
+
+
+----코드
+1.  현재 EBP(= ret 오염) 혹은 이전 함수 EBP(쓰기 액세스 위반) 오염
+2.  함수 진입시 EBP, ESP 변화
+	1) push EBP
+	2) mov EBP, ESP
+	3) sub esp, 지역변수크기 총합
+	4) 동작..
+	5) mov ESP, EBP
+	6) pop EBP
+	7) ret
+3.  volatile: 해당 변수의 최적화를 하지 않는다.
+4.  지역 상수와 전역 상수의 차이점
+ 	1) 지역상수는 포인터로 값 변경 가능
+ 	2) 전역상수는 포인터로 값 변경 불가(컴파일 타임 상수인 경우)
+5.  switch-case의 배치에 따라 달라지는 Jump Table
+6. 코드 최적화 관련(애매함)
+    1. Test1(++a, ++a, ++a);
+    2. a = 0;
+    3. Test2(a++, a++, a++); 컴파일 결과 분석해보기
+7. const 위치의 차이점(type 앞이냐 변수 이름 앞이냐)
+    1. const int* p1, int const* p1: p1이 가리키는 변수의 값을 변경할 수 없음
+    2. int* const p1: p1이 다른 대상의 주소로 바꿀 수 없음
+
+
+// ret 주소 오염
+0x00CFFE68  00 00 00 00  .... // ret할 주소
+0x00CFFE6C  00 00 00 00  .... // 호출자 지역변수(오류 발생 후 ESP)
+0x00CFFE70  84 fe cf 00  ???.
+
+// 호출자 EBP 오염
+0x009DFAB8  00 00 00 00  .... // EBP 오염 발생
+0x009DFABC  c0 10 a7 00  ?.?. // ret할 주소
+0x009DFAC0  00 00 00 00  .... // (오류 발생 후 ESP)
+0x009DFAC4  d8 fa 9d 00  ???.
+0x009DFAC8  aa 10 a7 00  ?.?.
+
+11월자 복습
+——필기
+1. 가상메모리 체계
+    1. Page
+        1. Page In, out, default의 개념
+        2. Page의 기본 단위
+        3. Page In혹은 out의 과정
+        4. Page default 시 Page In 과정
+2. Heap
+    1. malloc 과정: malloc ->HeapCreate->virtualAlloc->HeapAlloc
+——코드
