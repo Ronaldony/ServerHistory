@@ -1,0 +1,160 @@
+# 오버로딩
+## 일반 함수 오버로딩
+## 클래스 멤버함수 오버로딩
+## 연산자 오버로딩
+### 클래스 예시
+<pre><code>
+class Obj
+{
+    private:
+    int _x;
+    int _y;
+    public:
+    Obj(int x, int y) : _x(x), _y(y)
+    {}
+    void func(){}
+}
+</code></pre>
+### 연산자 오버로딩의 특징
+1. 멤버함수와 전역함수로 오버로딩된 연산자가 있을 때, 연산자 호출 시 멤버함수가 우선시되어 호출된다. (일부 컴파일러에서는 컴파일 에러 발생)
+### 이항 연산자(+, -, *, /)
+1. 정의
+<pre><code>
+// 멤버
+Obj operator+(const Obj& right)
+{
+    Obj ret(this->_x + right._x, this->_y + right._y);
+    return ret;
+}
+// 전역
+Obj operator+(const Obj& left, const Obj& right)
+{
+    Obj ret(left._x + right._x, left._y + right._y);
+    return ret;
+}
+</code></pre>
+2. 교환법칙
+<pre><code>
+// 전역 함수(교환법칙을 사용하기 위해서는 전역으로 정의해야한다.)
+Obj operator+ (Obj& ref, int add)
+{
+    Obj ret(ref._x + add, ref._y + add);
+    return ret;
+}
+Obj operator+ (int add, Obj& ref)
+{
+    return add + ref;
+}
+</code></pre>
+
+### 단항 연산자
+1. ++ (--도 동일)
+<pre><code>
+//////////////// 전위
+// 멤버
+Obj& operator++ ()
+{
+    // 멤버값 증가
+    this->_x++;    
+    return *this;
+}
+// 전역
+Obj& operator++ (Obj &ref)
+{
+    // 멤버값 증가
+    this->_x++;
+    return ref;
+}
+
+//////////////// 후위
+// 후위의 경우 (int++)++와 같이 연달아
+// 사용되는것을 막고자 const로 정의
+// 멤버
+const Obj operator++ (int)
+{
+    const Obj obj(_x, _y)
+    // 멤버값 증가
+    _x++;
+    return obj;
+}
+// 전역
+const Obj operator++ (Obj &ref, int)
+{
+    const Obj obj(ref)
+    // 멤버값 증가
+    ref._x++;
+    return obj;
+}
+</code></pre>
+
+### 대입 연산자
+1. =
+<pre><code>
+// 대입 연산자는 멤버함수로 밖에 오버로딩되지 않는다.
+Obj& operator= (const Obj& obj)
+{
+    // 멤버 복사
+    this->_x = obj._x;    
+    return *this;
+}
+</code></pre>
+
+### cout과 endl(ft. <<, >>)
+1. <<
+<pre><code>
+// 클래스 멤버에 선언
+friend ostream& operator<<(ostream&, const Obj&);
+
+// 전역 정의
+ostream& operator<<(ostream& os, const Obj& obj)
+{
+    // 이 때 "<<"는 Default가 호출된다.
+    os << obj._x << obj._y << endl;
+    return os;
+}
+</code></pre>
+2. >>
+<pre><code>
+// 클래스 멤버에 선언
+friend istream& operator>>(istream&, const Obj&);
+
+// 전역 정의
+istream& operator>>(ostream& os, const Obj& obj)
+{
+    // 이 때 ">>"는 Default가 호출된다.
+    is >> obj._x >> obj._y;
+    return is;
+}
+
+### 참조자(이를 이용한 스마트 포인터 구현 가능)
+1. * 
+<pre><code>
+Obj& operator* ()
+{
+    return *this;
+}
+</code></pre>
+2. ->
+<pre><code>
+Obj* operator-> ()
+{
+    return this;
+}
+</code></pre>
+
+### [], ()
+1. () (이를 이용한 Functor 구현 가능)
+<pre><code>
+type operator() (int x, int y)
+{
+    // 구현 내용...
+}
+</code></pre>
+2. [] (클래스를 배열과 같이 사용 가능)
+<pre><code>
+int& operator[] (int idx)
+{
+    // 단, _x 멤버 변수가 동적 할당한 포인터라 가정
+    return _x[idx];
+}
+</code></pre>
