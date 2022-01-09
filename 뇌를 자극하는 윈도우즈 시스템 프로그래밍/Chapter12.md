@@ -53,4 +53,42 @@
      * 그 이유로는 TerminateThread, ExitThread 함수 사용 시 객체의 소멸자 호출이 안되어 메모리 누수가 발생할 수 있다.
 
 ## Section02 쓰레드의 성격과 특성
-### 힙, 데이터 영역, 그리고 코드 영역의 공유에 대한 검증
+### 동시접근에 있어서의 문제점
+1. 두 쓰레드가 같은 데이터를 사용중인 경우 발생할 수 있는 문제점
+    1) A 쓰레드가 데이터에 먼저 접근하여 레지스터에 저장 후 연산
+    2) A 쓰레드가 결과를 메모리에 적재하지 않은 상태에서 B 쓰레드가 CPU 점유(컨텍스트 스위칭)
+    3) B 쓰레드가 데이터에 접근하여 연산 및 메모리 적재 후 A 쓰레드에게 CPU 양도
+    4) A 쓰레드가 결과를 메모리에 적재
+    * 결과적으로 B 쓰레드의 결과가 A 쓰레드의 결과로 덮어씌어졌다.
+
+### 프로세스로부터의 쓰레드 분리
+1. 핸들 테이블은 프로세스에 종속적이며, 같은 프로세스 내 쓰레드들은 이를 공유한다.
+2. 프로세스로부터의 쓰레드 분리
+    * 자식 프로세스의 경우 부모 프로세스로부터 생성되면 Usage Count가 2가 된다. 쓰레드도 마찬가지로 쓰레드가 생성된 시점에 Usage Count는 2가 된다. 이 때 CloseHandle을 호출하여 해당 쓰레드의 Usage Count를 1로 만드는 것이 **프로세스로부터의 쓰레드 분리**라고 한다.
+
+### ANSI 표준 C 라이브러리와 쓰레드
+1. 초기 표준 C 라이브러리 설계 시 쓰레드에 대한 고려가 이뤄지지 않았다. 때문에 멀티 쓰레드 기반 프로그램에서 표준 C 라이브러리 사용 간 동일 메모리 영역을 동시 접근하는 불상사가 발생했었다. (대표적으로 strtok 함수)마이크로소프트는 이러한 문제에 대하여 멀티 스레드에 안전한 표준 C 라이브러리를 제공한다.
+    <img width=600 src="https://user-images.githubusercontent.com/95362065/148686025-3e948914-d5e7-4e21-86d1-391fbc14d2c7.png">
+2. _beginthreadex
+    1) 안전한 표준 C 라이브러리에서 제공하는 쓰레드 생성 함수이며, 쓰레드의 독립적인 메모리 블록을 할당시킨다.
+    <pre><code>
+    기능: 쓰레드를 생성하며, 인자는 CreateThread 함수와 동일한 인자 구성을 같는다.
+    헤더: process.h
+    uintptr_t _beginthreadex(
+        void *security,
+        unsigned stack_size,
+        unsigned ( __stdcall *start_address )( void * ),
+        void *arglist,
+        unsigned initflag,
+        unsigned *thrdaddr
+    );
+    </code></pre>
+    2) _beginthreadex
+    <pre><code>
+    기능: 내부적으로 _beginthreadex에서 할당된 쓰레드 독립 메모리를 해제하고 ExitThread를 호출한다.
+    void _endthreadex(
+        unsigned retval
+    );
+    </code></pre>
+
+### Section03 쓰레드의 상태 컨트롤
