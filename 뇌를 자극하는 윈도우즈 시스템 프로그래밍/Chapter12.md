@@ -91,4 +91,27 @@
     );
     </code></pre>
 
-### Section03 쓰레드의 상태 컨트롤
+## Section03 쓰레드의 상태 컨트롤
+### Suspend & Resume
+1. Suspend & Resume
+    <pre><code>
+    // 쓰레드를 Blocked 상태에 두는 함수
+    DWORD SuspendThread(HANDLE hThread);
+    // 쓰레드를 Ready 상태에 두는 함수
+    DWORD ResumeThread(HANDLE hThread);
+    </code></pre>
+2. 서스펜드 카운트(Suspend Count): SuspendThread 호출 빈도수를 나타내며 쓰레드의 커널 오브젝트에 기록됨.
+    * CreadThread로 쓰레드 생성 시에 Suspend 옵션을 지정하면 서프펜드 카운트 1로 생성된다.
+    * ResumeThread 함수 호출 시 서스펜드 카운트 1 감소한다.
+
+## Section04 쓰레드의 우선순위 컨트롤
+### 기준 우선순위와 상대적 우선순위
+1. 쓰레드의 우선순위는 프로세스의 기준 우선순위와 쓰레드의 상대적 우선순위의 **조합**으로 결정된다.
+    * 참조: https://docs.microsoft.com/ko-kr/windows/win32/procthread/scheduling-priorities
+2. 관련 함수
+    <pre><code>
+    // 쓰레드의 상대적 우선순위 변경
+    BOOL SetThreadPriority(HANDLE hThread, int nPriority);
+    // 쓰레드의 상대적 우선순위 값 반환
+    int GetThreadPriority(HANDLE hThread);
+    </code></pre>
