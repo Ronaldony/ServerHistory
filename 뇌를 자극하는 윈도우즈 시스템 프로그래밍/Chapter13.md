@@ -56,7 +56,7 @@
     </code></pre>
     
 ### 인터락 함수 기반의 동기화
-1. 인터락 함수를 호출하여 동기화하는 기법이다. 변수 하나의 접근에 대해서 동기화가 필요한 경우 유용하다. 
+1. 인터락 함수를 호출하여 동기화하는 기법이다. 변수 하나의 접근에 대해서 동기화가 필요한 경우 유용하다.
 2. 관련 함수
     <pre><code>
     // 인터락 함수는 내부적으로 한 순간에 하나의 쓰레드에 의해서만 실행되도록 동기화되어 있다.
@@ -65,6 +65,24 @@
     LONG InterlockedIncrement(LONG volatile* Addend);
     
     // 인자로 입력된 변수의 값을 1 감소시킨다.
-    LONG InterlockedDecrement(LONG volatile* Addend);
-    
+    LONG InterlockedDecrement(LONG volatile* Addend);    
     </code></pre>
+3. MS는 위에서 소개한 함수말고도 다양한 형태의 인터락 함수를 제공한다.
+
+## Section04 커널 모드 동기화
+### 뮤텍스 기반의 동기화
+1. 뮤텍스 오브젝트(이하 뮤텍스)를 생성하여 동기화하는 방법이다.
+2. 관련 함수
+    <pre><code>
+    // 뮤텍스 생성
+    HANDLE CreateMutex(
+        LPSECURITY_ATTRIBUTES lpMutexAttributes,    // 보안 속성(상속 관련)
+        BOOL bInitialOwner,                         // 초기 뮤텍스 사용 여부
+        LPCTSTR lpName                              // 뮤텍스 이름(이름있는 뮤텍스 생성 시 사용, 기본 값은 NULL)
+    );
+    
+    // 뮤텍스 반환, 
+    // 
+    BOOL ReleaseMutex( HANDLE hMutex );
+    </code></pre>
+3. 뮤텍스 오브젝트는 획득이 가능한 경우 Signaled 상태가 되고, 사용 중인 경우 Non-Signaled 상태가 된다.
