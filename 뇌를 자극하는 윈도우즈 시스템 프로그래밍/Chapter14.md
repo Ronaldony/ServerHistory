@@ -9,7 +9,7 @@
     // 이벤트 오브젝트 생성
     HANDLE CreateEvent( 
         LPSECURITY_ATTRIBUTES lpEventAttributes,    // 보안 속성
-        BOOL bManualReset,      // *이벤트 오브젝트의 수동/자동 리셋 모드 지정(아래에서 추가 설명)
+        BOOL bManualReset,      // *이벤트 오브젝트의 수동(TRUE)/자동(FALSE) 리셋 모드 지정(아래에서 추가 설명)
         BOOL bInitialState,     // 이벤트 오브젝트의 초기 상태를 결정한다. true: signaled, false: non-signaled
         LPTSTR lpName           // 이벤트 오브젝트 이름
     );
@@ -42,4 +42,33 @@
     </code></pre>
     
 ## Section02 이벤트 더하기 뮤텍스
-1. 
+* 생략
+
+## Section03 타이머 기반 동기화
+### 타이머 오브젝트
+1. 타이머 오브젝트는 정해진 시간이 지나면 **자동으로 Signaled 상태**가 된다.
+2. 종류
+    1) 수동 리셋 타이머: 정해진 시간에만 Signaled 상태가 된다.
+    2) 자동 리셋 타이머: 정해진 시간 이후 주기적으로 Signaled 상태로 전환한다.
+3. 타이머 오브젝트는 생성 시 non-signaled 상태이다.
+
+### 수동/자동 리셋 타이머
+1. 관련 함수
+    <pre><code>
+    // 타이머 생성
+    HANDLE CreateWaitableTimer(
+        LPSECURITY_ATTRIBUTES lpTimerAttributes,    // 보안 속성
+        BOOL                  bManualReset,         // 리셋 모드 지정 인자, TRUE: 수동, FALSE: 자동
+        LPCWSTR               lpTimerName           // 타이머 이름
+    );
+    
+    // 알람 시간 설정
+    BOOL SetWaitableTimer(
+        HANDLE              hTimer,                     // 타이머 오브젝트 핸들
+        const LARGE_INTEGER *lpDueTime,                 // 알람이 울리는 시간(+는 절대 시간, -는 상대적 시간을 의미한다.), 100nsec 단위이다.
+        LONG                lPeriod,                    // 주기적 알람 시간 설정 인자, 1msec 단위이다.
+        PTIMERAPCROUTINE    pfnCompletionRoutine,       // 완료 루틴 타이머 설정 인자(19 장에서 소개)
+        LPVOID              lpArgToCompletionRoutine,   // 위와 동일
+        BOOL                fResume                     // 전원 관리 관련 인자(기본 FALSE)
+    );
+    </code></pre>
