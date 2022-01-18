@@ -62,6 +62,18 @@
     DWORD MakeThreadToPool(DWORD numOfThread);  // numOfThread: 이 수만큼 쓰레드가 생성됨
     
     // 쓰레드의 main 함수
-    void WorkerThreadFunction(LPVOID pParam);   // pParam: 쓰레드 main 함수에 전달될 인자
+    void WorkerThreadFunction(LPVOID pParam);   // pParam: 쓰레드의 번호(이벤트 동기화 오브젝트 핸들을 얻기 위함)
     </code></pre>
-2. 
+2. 쓰레드 풀 활용 절차
+    <pre><code>
+    Step1 쓰레드 등록(N개)
+        MakeThreadToPool(N)
+        
+    Step2 Work 등록
+        AddWorkToPool(work)
+    
+    Step3 풀에 등록된 Work 할당
+        GetWorkFromPool(work)
+        
+    Step4 일이 할당된 쓰레드의 이벤트 동기화 오브젝트 Signeld 상태로 변경
+    </code></pre>
