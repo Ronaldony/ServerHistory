@@ -42,4 +42,45 @@
         </code></pre>
     3) 3단계: 파이프 생성 및 OVERLAPPED 구조체 변수 초기화가 끝나면, WriteFile 함수를 호출 시 FILE_FLAG_OVERLAPPED가 설정된 파이프와 OVERLAPPED 구조체를 인자로 전달한다. 그래야 비로소 WriteFile 함수가 중첩 I/O 방식으로 동작하게 된다.
 3. 예제 코드
-    
+    * .../Chapter19_src 폴더 참조
+4. 주의할 점
+    1) 중첩 I/O에서는 I/O 연산 자체에 병목현상이 일어날 수 있다. 이런 상황에서는 진행중이던 I/O 연산이 완료되었는지 확인한 후 다음 I/O 연산이 이루어져야 한다.
+        * GetOverlappedResult 함수를 사용하여 이 상황을 해결할 수 있다.
+    2) 동기 I/O 연산에서 최종 목적지인 클라이언트에게 데이터 전송이 완료되어야만 반환하는 구조가 아니라, 전송을 위해 할당된 내부 메모리 버퍼에 복사가 이뤄지고 나면 반환하는 구조이다.
+        * 따라서, WriteFile 함수 호출 시 전송할 데이터 크기보다 파이프 통신 출력 버퍼를 작게 하여야 한다.
+
+### 완료루틴(Completion Routine) 기반 확장 I/O
+1. 완료루틴: I/O 연산이 완료되었을 때 실행되는 루틴(함수)
+2. 완료루틴 확장 I/O 특징
+    1) 완료루틴 확장 I/O는 중첩 I/O 기능 + 완료루틴 호출 기능을 기본으로 한다.
+        * 때문에 위 중첩 I/O에서 사용된 이벤트 오브젝트가 필요 없다.
+    2) WriteFile / ReadFile 함수 대신 WriteFileEx / ReadFileEx 함수를 호출한다.
+        * WriteFileEx / ReadFileEx
+            <pre><code>
+            BOOL WriteFileEx(
+                HANDLE                          hFile,                  // lpCompletionRoutine 제외 WriteFile과 동일
+                LPCVOID                         lpBuffer,
+                DWORD                           nNumberOfBytesToWrite,
+                LPOVERLAPPED                    lpOverlapped,            
+                LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine     // 출력 작업이 끝난 후 호출될 완료루틴
+            );
+
+            BOOL ReadFileEx(
+                HANDLE                          hFile,                  // lpCompletionRoutine 제외 ReadFile과 동일
+                LPVOID                          lpBuffer,
+                DWORD                           nNumberOfBytesToRead,
+                LPOVERLAPPED                    lpOverlapped,
+                LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine     // 입력 작업이 끝난 후 호출될 완료루틴
+            );
+            
+            // typedef LPOVERLAPPED_COMPLETION_ROUTINE 
+            typedef
+            VOID
+            (WINAPI *LPOVERLAPPED_COMPLETION_ROUTINE)(
+                _In_    DWORD dwErrorCode,
+                _In_    DWORD dwNumberOfBytesTransfered,
+                _Inout_ LPOVERLAPPED lpOverlapped
+            );
+            </code></pre>
+
+### 알림 가능한 상태(Alertable State)
