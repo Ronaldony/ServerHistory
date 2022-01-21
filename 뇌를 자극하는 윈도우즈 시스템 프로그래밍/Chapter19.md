@@ -48,6 +48,7 @@
         * GetOverlappedResult 함수를 사용하여 이 상황을 해결할 수 있다.
     2) 동기 I/O 연산에서 최종 목적지인 클라이언트에게 데이터 전송이 완료되어야만 반환하는 구조가 아니라, 전송을 위해 할당된 내부 메모리 버퍼에 복사가 이뤄지고 나면 반환하는 구조이다.
         * 따라서, WriteFile 함수 호출 시 전송할 데이터 크기보다 파이프 통신 출력 버퍼를 작게 하여야 한다.
+        * 실질적인 외부로의 데이터 전송을 위해 내부 버퍼를 만들어두고 그 버퍼에서 다시 가져다가 외부로 전송을 한다. 즉, 우리가 쓴다는 것은 그 버퍼에 쓰는 행위이다.
 
 ### 완료루틴(Completion Routine) 기반 확장 I/O
 1. 완료루틴: I/O 연산이 완료되었을 때 실행되는 루틴(함수)
@@ -82,5 +83,90 @@
                 _Inout_ LPOVERLAPPED lpOverlapped
             );
             </code></pre>
-
+    
 ### 알림 가능한 상태(Alertable State)
+1. Windows는 완료루틴 확장 I/O 연산이 완료되어 완료루틴을 실행되는 시점을 개발자가 정하도록 하였다. 그 시점은 SleepEx 함수를 통해 정할 수 있다.
+2. SleepEx
+    <pre><code>
+    DWORD SleepEx(
+        DWORD dwMilliseconds,   // 쓰레드 실행 정지 시간
+        BOOL  bAlertable        // true: 쓰레드를 알림 가능한 상태로 변경, false: 일반 Sleep 함수와 동일하게 동작
+    );
+    </code></pre>
+    * 쓰레드가 "알림 가능한 상태"가 되면 완료루틴의 호출이 이뤄진다. 호출되어야 할 완료루틴이 둘 이상인 경우에는 모두 다 호출된다.(SleepEx를 중복 호출할 필요가 없음)
+    * 만약, bAlertable가 true이고, dwMilliseconds 시간 초과 시 I/O 작업이 완료되지 않으면 **완료루틴을 호출하지 않는다**.
+    * 중첩 I/O를 해야하는 경우 모든 I/O 연산을 실행하고 마지막에 쓰레드를 "알림 가능한 상태"로 변경해야 한다.
+3. SleepEx 이 외 "알림 가능한 상태"로 만드는 함수들
+    * WaitForSingleObjectEx, WaitForMultipleObjectsEx
+4. 비동기 I/O의 문제
+    1) 비동기 I/O에서 커널 오브젝트에 존재하는 파일의 위치 정보는 의미가 없다.
+        * 예를 들어 하나의 파일에 연속적으로 WriteFile 비동기 I/O 연산을 하는 경우 파일 I/O가 정상적으로 이루어지지 않는다.
+        * 해결 방법: WriteFile에 인자로 들어가는 OVERLAPPED의 Offset, OffsetHigh 멤버를 활용하여 위 문제를 해결할 수 있다.
+            <pre><code>
+            // hFile: 파일 핸들
+            // dataBufx: 전송할 데이터 버퍼
+            // bytesWritex: 전송 데이터 크기
+            // overlappedInst: OVERLAPPED 구조체
+            // FileIOCompletionRoutine: 완료 루틴 주소
+
+            OVERLAPPED overlappedInstPtr;
+            overlappedInstPtr.Offset = 0;
+
+            OVERLAPPED overlappedInstOne;
+            overlappedInstOne.Offset = 0;
+            WriteFileEx(hFile, dataBuf1, bytesWrite1, &overlappedInstOne, FileIOCompletionRoutine);
+            overlappedInstPtr.Offset += wcslen(dataBuf1) * sizeof(wchar_t);     // 파일의 위치 정보 갱신
+
+            OVERLAPPED overlappedInstTwo;
+            overlappedInstTwo.Offset = overlappedInstPtr.Offset;                // 파일의 위치 정보 초기화
+            WriteFileEx(hFile, dataBuf2, bytesWrite2, &overlappedInstTwo, FileIOCompletionRoutine);
+            overlappedInstPtr.Offset += wcslen(dataBuf2) * sizeof(wchar_t);        // 파일의 위치 정보 갱신        
+            </code></pre>
+
+### 타이머에서의 완료루틴
+1. SetWaitableTimer 함수의 완료루틴
+    <pre><code>    
+    BOOL SetWaitableTimer(
+        HANDLE              hTimer,                     // 타이머 핸들
+        const LARGE_INTEGER *lpDueTime,                 // 타이머 시간
+        LONG                lPeriod,                    // 주기적 타이머
+        PTIMERAPCROUTINE    pfnCompletionRoutine,       // 완료루틴 지정(아래 추가 정보)
+        LPVOID              lpArgToCompletionRoutine,   // 완료루틴의 첫 번째 전달인자 정보
+        BOOL                fResume
+    );
+    
+    // 완료루틴 인자 함수
+    typedef
+    VOID
+    (APIENTRY *PTIMERAPCROUTINE)(
+        _In_opt_ LPVOID lpArgToCompletionRoutine,   // SetWaitableTimer 함수의 lpArgToCompletionRoutine 데이터
+        _In_     DWORD dwTimerLowValue,             // 타이머가  Signaled 상태가 된 시간 정보
+        _In_     DWORD dwTimerHighValue             // 타이머가  Signaled 상태가 된 시간 정보
+    );    
+    </code></pre>
+    
+### 지금까지의 내용 정리
+1. Windows는 기본적으로 두 가지 방식의 비동기 I/O를 지원한다. 중첩 그리고 완료루틴 확장 I/O 방식이다.
+2. 비동기 I/O는 넌블로킹 함수, 동기 I/O는 블로킹 함수를 사용한다.
+3. 블로킹 함수 I/O는 함수를 반환하는 시점과 I/O 연산 완료 시점이 일치한다. 반면 넌블로킹 함수는 I/O 연산의 완료와 상관없이 함수를 반환한다.
+
+## Section02 APC(Asynchronous Procedure Call)
+### APC
+1. APC: 비동기 함수 호출 매커니즘을 의미한다.
+2. 앞서 소개한 ReadFileEx, WriteFileEx, SetWaitableTimer 등의 함수는 APC를 기반으로 구현된 함수들이다.
+
+### APC의 구조
+1. APC는 크게 "User-mode APC", "Kernel-mode APC" 이 두 가지 종류로 나뉜다. Kernel-mode PAC는 다시 "Normal"과 "Special"로 나뉜다.
+2. **모든 쓰레드**는 자신만의 APC Queue를 가지고 있다. 
+    * <img width=650 src="https://user-images.githubusercontent.com/95362065/150547377-5f31bd31-f467-4969-952b-9e72becefbbd.png">
+    * 위 그림처럼 APC Queue에는 비동기적으로 호출되어야 할 함수들과 매개변수 정보가 저장된다. 그러나 쓰레드가 알림 가능 상태가 되어야만 비로소 호출된다.
+
+### APC Queue의 접근
+1. APC에 호출 함수를 등록하는 함수
+    <pre><code>
+    DWORD QueueUserAPC(
+        PAPCFUNC pfnAPC,    // APC에 등록할 함수(완료루틴)
+        HANDLE hTrhead,     // APC Queue 소유 쓰레드 핸들
+        ULONG_PTR dwData    // 함수에 전달될 인자
+    );
+    </code></pre>
