@@ -111,7 +111,7 @@
     * 주소 체계와 소켓 타입만으로 프로토콜을 결정할 수 있는 경우가 있다. 그러나 일반적으로 프로토콜 인자까지 명시하여야 한다.
 5. TCP, UDP 사용 시 socket 함수 인자 전달
     |사용할 프로토콜|주소 체계|소켓 타입|프로토콜|
-    |------|---|---|
+    |------|---|---|---|
     |TCP|AF_INET or AF_INET6|SOCK_STREAM|IPPROTO_TCP|
     |UDP|AF_INET or AF_INET6|SOCK_DGRAM|IPPROTO_UDP|
     
