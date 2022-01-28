@@ -23,7 +23,7 @@
     4) accept(): 클라이언트가 통신할 수 있는 새로운 소켓을 생성한다. 이때 **원격 IP 주소와 원격 포트 번호**가 결정
     5) send(), recv() 함수로 클라이언트와 데이터 송수신 후 closesocket() 함수로 소켓을 닫음
     6) 이후 4-5 과정을 반복
-2. bind 함수
+2. 서버 함수
     <pre><code>
     // bind
     int bind(
@@ -49,3 +49,21 @@
     );
     * 클라이언트의 IP주소와 포트 번호를 알 필요가 없다면 addr, addrlen에 NULL 전달
     </code></pre>
+
+### TCP 클라이언트 함수
+1. 일반적으로 TCP 클라리언트는 다음과 같은 순서로 소켓 함수를 호출한다.
+    1) socket(): 소켓 생성 및 프로토콜이 결정된다.
+    2) connect(): 원격-지역 IP 주소와 포트 번호가 결정된다.
+    3) send(), recv() 함수로 클라이언트와 데이터 송수신 후 closesocket() 함수로 소켓을 닫음
+2. 클라이언트 함수
+    <pre><code>
+    // connect 함수
+    int WSAAPI connect(
+        SOCKET         s,       // 서버와 통신할 소켓
+        const sockaddr *name,   // 서버측의 소켓 주소 구조체를 초기화하여 전달
+        int            namelen  // 소켓 주소 구조체의 길이
+    );
+    </code></pre>
+
+### TCP 데이터 전송 함수
+1. 
