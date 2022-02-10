@@ -14,6 +14,7 @@
 1. 스레드는 정지 카운트가 0일 때 I/O 작업등 이유로 Blocked 상태가 아닌 이상 **스케줄 가능한 상태(Ready)**가 된다.
 2. SuspendThread 호출 시 세심한 주의가 필요하다. 만일 스레드가 힙 할당 중 SuspendThread를 호출하여 정지되면, 이 스레드는 힙을 잠그게 된다. (힙 내부에서 HeapLock) 이때 다른 스레드가 힙 할당 접근 시 정지된다.
     * 따라서 SuspendThread 함수는 스레드가 정지될 때 발생하는 문제와 데드락을 피할 수 있는 명확한 방법이 있는 경우에만 사용되어야 한다.
+    * SuspendThread 함수 호출 시 해당 스레드가 커널 모드의 코드를 수행 시 커널 모드 작업이 끝나고 스레드가 정지된다.
 
 ## Section02 프로세스의 정지와 계속 수행
 ### 프로세스의 정지
@@ -70,3 +71,51 @@
         LPFILETIME lpUserTime       // 유저 시간. 응용 코드를 수행하는 데 소요된 CPU 시간
     );
     </code></pre>
+2. 응용
+    <pre><code>
+    GetThreadTimes(..., lpKernelTimeStart, lpUserTimeStart);
+    // 알고리즘
+    GetThreadTimes(..., lpKernelTimeEnd, lpUserTimeEnd);
+    
+    // 알고리즘이 총 소요한 시간 = 커널 모드 시간 + 유저 모드 시간
+    total = (lpKernelTimeEnd - lpKernelTimeStart) + (lpUserTimeEnd - lpUserTimeStart);
+    </code></pre>
+
+### CPU 시간 계산
+1. 윈도우 비스타 이전의 OS는 클록 타이머(ClockRes 사용)를 기반으로 10-15ms 단위로 CPU 시간을 계산하였다. 비스타부터는 OS 시작 이후 시간을 저장하는 TSC를 사용하여 CPU 시간을 계산한다.
+2. 스레드가 스케줄러에 의해 정지되면 현재의 TSC 값과 스레드가 재시작되었던 시점에 획득된 TSC 값과의 차를 계산한 후 수행 시간에 더해준다.
+
+## Section07 컨텍스트 내의 CONTEXT 구조체
+### CONTEXT 구조체
+1. 역할: 시스템이 저장하는 스레드의 상태 정보로, 다음번에 CPU가 스레드를 수행할 때 어디서부터 수행을 시작해야 할지를 알려주는 역할
+2. 구조: 프로세스별 레지스터 데이터를 가지고 있다.
+    * MSDN에서는 CONTEXT 구조체 각 멤버들이 하는 역할을 설명하지 않고 있다. 그 이유는 CPU별로 서로 다르기 때문이다.
+4. 관련 함수
+    <pre><code>
+    // 해당 스레드의 유저 모드의 CONTEXT 구조체 얻어오기
+    BOOL GetThreadContext(
+        HANDLE    hThread,
+        LPCONTEXT lpContext // Get할 CONTEXT 구조체 주소
+    );
+    * GetThreadContext 함수를 호출하기 위해서는 반드시 SuspendThread를 호출하여 스레드를 정지한 상태여야 한다. SuspendThread 호출 시
+    스레드가 커널 모드로 동작하는 경우에도 유저 CONTEXT 구조체 내용이 변경되지 않으므로 GetThreadContext는 정상적인 레지스터를 읽어온다.
+    
+    // 해당 스레드의 유저 모드의 CONTEXT 구조체 변경
+    BOOL SetThreadContext(
+        HANDLE        hThread,
+        const CONTEXT *lpContext    // 
+    );
+    * GetThreadContext 함수와 마찬가지로 호출 전 SuspendThread를 호출해야 한다.
+    </code></pre>
+    
+## Section08 스레드 우선순위
+### 우선순위
+1. 제로 페이지 스레드: 시스템 부팅 시 생성되는 특별한 스레드이다. 이 스레드는 0번 우선순위를 가진 유일한 스레드이며, 시스템 내 어떠한 스레드도 스케줄 가능 상태가 아닐 때 램의 사용되지 않는 페이지를 0으로 만들어주는 작업을 수행한다.
+
+## Section09 우선순위의 추상적인 의미
+### 호환성을 위한 MS의 선택 
+1. MS가 시스템의 동작 방식을 변경하면서도 이전에 개발된 소프트웨어가 정상적으로 수행되도록 보장할 수 있었던 방법
+    1) 스케줄러의 동작 방식을 완벽하게 문서화하지 않았다.
+    2) 애플리케이션이 스케줄러의 기능상의 장점을 완벽하게 이용하지 못하도록 하였다.
+    3) 스케줄러의 알고리즘은 변경될 수 있으므로 코드를 방어적으로 작성할 것을 지속적으로 알려왔다.
+2. 최종 사용자가 우리가 개발한 어플 외에도 다른 어플을 동시에 사용할 가능성이 있는지에 대해 고려해야 한다. 그 상황에서 어플의 스레드가 어느 정도의 응답성이 요구되는지 판단하고, 이를 기준으로 프로세스의 우선순위 클래스를 결정해야 한다. 
