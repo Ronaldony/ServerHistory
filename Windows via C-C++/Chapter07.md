@@ -119,3 +119,25 @@
     2) 애플리케이션이 스케줄러의 기능상의 장점을 완벽하게 이용하지 못하도록 하였다.
     3) 스케줄러의 알고리즘은 변경될 수 있으므로 코드를 방어적으로 작성할 것을 지속적으로 알려왔다.
 2. 최종 사용자가 우리가 개발한 어플 외에도 다른 어플을 동시에 사용할 가능성이 있는지에 대해 고려해야 한다. 그 상황에서 어플의 스레드가 어느 정도의 응답성이 요구되는지 판단하고, 이를 기준으로 프로세스의 우선순위 클래스를 결정해야 한다. 
+3. 실시간 우선순위 클래스는 가능한 한 사용하지 않는 것이 좋다. OS가 운용하는 스레드들 조차도 대부분 이보다 낮아 디스크 I/O, 네트워크 트래픽, 키보드 및 마우스 입력 등의 동작을 방해할 수 가 있다.
+    * 스케줄링 우선순위 향상 권한이 없는 사용자는 실시간 우선순위 클래스로 프로세스를 수행하지 못한다. 보통 관리자나 파워 유저가 이 권한을 가진다.
+
+### 우선순위
+1. 프로세스에는 프로세스 우선순위 클래스가 할당되고, 스레드에는 프로세스 우선순위에 상대적인 스레드 우선순위가 할당된다.
+2. 프로세스 우선순위를 변경하는 방법
+    1) SetPriorityClass 함수
+    2) 명령 쉘: START /LOW CALC.EXE
+    3) 작업관리자
+
+### I/O 요청 우선순위 스케줄링
+1. 윈도우 비스타부터 스레드가 I/O 요청에 대해 우선순위를 지정할 수 있게 하였다.
+    1) 방법
+        <pre><code>
+        // 각 스레드는 자신의 I/O 우선순위만 변경할 수 있다.
+        SetThreadPriority(GetCurrentThread(), THREAD_MODE_BACKGROUND_BEGIN);    // 낮은 우선순위 I/O 요청
+        SetThreadPriority(GetCurrentThread(), THREAD_MODE_BACKGROUND_END);      // 보통 우선순위 I/O 요청     
+        
+        // 프로세스 내 모든 스레드에 대한 IO 우선순위 변경
+        SetPriorityClass(GetCurrentProcess(), PROCESS_MODE_BACKGROUND_BEGIN);    // 낮은 우선순위 I/O 요청
+        SetPriorityClass(GetCurrentProcess(), PROCESS_MODE_BACKGROUND_END);      // 보통 우선순위 I/O 요청     
+        </code></pre>
