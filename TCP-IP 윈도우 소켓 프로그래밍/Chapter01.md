@@ -112,10 +112,8 @@
 4. 라우터: OSI L3 스위치로 IP를 사용하여 라우팅을 한다.
 5. IP 공유기: 허브와 라우터를 합친 형태
 
-### RFC
-
-
 ### TCP/IP 연관 프로토콜
 1. ARP: Address Resolution Protocol, IP 주소를 물리적 네트워크 주소로 대응(bind)시키기 위해 사용되는 프로토콜
-2. ICMP: Internet Control Message Protocol, 패킷 전송이 실패했을 때 에러가 났음을 알림과 동시에, 해결 가능한 힌트를 제공함. ICMP 오류들은 원래 패킷의 소스 IP 주소로 보내진다.
+2. ICMP: Internet Control Message Protocol, 패킷 전송 중 에러 발생 시, 에러의 원인을 알려주거나 네트워크 상태를 진단해주는 기능을 제공하는 프로토콜. ICMP 오류들은 원래 패킷의 소스 IP 주소로 보내진다.
+    * 주요 ICMP 메시지: 목적지 도달 불가, 재지정, 이웃 요청과 광고, 시간 초과(TTL=0), Echo(Ping 테스트)
 3. IGMP: Internet Group Management Protocol, 호스트 컴퓨터와 인접 라우터가 멀티캐스트 그룹 멤버십을 구성하는 데 사용하는 통신 프로토콜
