@@ -126,7 +126,7 @@
 1. 프로세스에는 프로세스 우선순위 클래스가 할당되고, 스레드에는 프로세스 우선순위에 상대적인 스레드 우선순위가 할당된다.
 2. 프로세스 우선순위를 변경하는 방법
     1) SetPriorityClass 함수
-    2) 명령 쉘: START /LOW CALC.EXE
+    2) 명령 쉘: START /LOW CA LC.EXE
     3) 작업관리자
 
 ### I/O 요청 우선순위 스케줄링
@@ -138,6 +138,13 @@
         SetThreadPriority(GetCurrentThread(), THREAD_MODE_BACKGROUND_END);      // 보통 우선순위 I/O 요청     
         
         // 프로세스 내 모든 스레드에 대한 IO 우선순위 변경
-        SetPriorityClass(GetCurrentProcess(), PROCESS_MODE_BACKGROUND_BEGIN);    // 낮은 우선순위 I/O 요청
+        SetPriorityClass(GetCurrentProcess(),  PROCESS_MODE_BACKGROUND_BEGIN);    // 낮은 우선순위 I/O 요청
         SetPriorityClass(GetCurrentProcess(), PROCESS_MODE_BACKGROUND_END);      // 보통 우선순위 I/O 요청     
+        
+        // 파일 단위로 지정하기
+        SetFileInformationByHandle(...);
         </code></pre>
+2. 우선순위 역전 현상
+   1) 낮은 우선순위의 스레드가 요청한 I/O 작업으로 인해 보통 우선순위 스레드가 요청한 I/O 작업이 지연되는 현상
+
+### 스케줄링 실습 예제 어플리케이션
