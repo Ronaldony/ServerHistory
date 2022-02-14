@@ -147,4 +147,34 @@
 2. 우선순위 역전 현상
    1) 낮은 우선순위의 스레드가 요청한 I/O 작업으로 인해 보통 우선순위 스레드가 요청한 I/O 작업이 지연되는 현상
 
-### 스케줄링 실습 예제 어플리케이션
+## Section11 선호도
+### 선호도
+1. 소프트 선호도(soft affinity): 다른 조건이 모두 동일하다면 마지막으로 스레드를 수행했던 프로세스가 동일 스레드를 다시 수행하는 것
+    * 캐시 히트율을 높이기 위한 방법이다.
+2. 자식 프로세스는 부모 프로세스 선호도를 상속한다.
+
+### CPU 지정 수행
+1. 프로세스 CPU 선호도 관련
+    <pre><code>
+    // 특정 프로세스의 스레드를 지정 CPU에서 수행하도록 한다.
+    BOOL SetProcessAffinityMask(
+        HANDLE    hProcess,
+        DWORD_PTR dwProcessAffinityMask // 프로세스 CPU 선호도, 이 값은 시스템 선호도의 부분 집합이어야 한다.
+    );
+    
+    // 특정 프로세스의 CPU 선호도 얻어온다.
+    BOOL GetProcessAffinityMask(
+        HANDLE     hProcess,
+        PDWORD_PTR lpProcessAffinityMask,   // 지정 프로세스의 CPU 선호도 저장
+        PDWORD_PTR lpSystemAffinityMask     // 시스템 선호도 마스크 값
+    );
+    * 시스템 선호도 마스크: 시스템이 어떠한 CPU들을 사용해서 스레드를 수행할 수 있는지를 가리키는 값
+    </code></pre>
+2. 스레드 CPU 선호도 관련
+    <pre><code>
+    // 각 스레드별로 선호도 마스크를 지정
+    BOOL SetThreadAffinityMask(
+        HANDLE    hProcess,
+        DWORD_PTR dwThreadAffinityMask // 스레드 CPU 선호도, 이 값은 프로세스 CPU 선호도의 부분 집합이어야 한다.
+    );
+    </code></pre>    
