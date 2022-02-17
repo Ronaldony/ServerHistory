@@ -135,4 +135,46 @@
 
 ### 크리티컬 섹션과 에러 처리
 1. InitializeCriticalSection 함수는 내부적으로 디버깅 정보를 위한 메모리 블럭을 할당하는데, 메모리 블럭 할당을 실패하는 경우도 있다. 이는 InitializeCriticalSectionAndSpinCount 함수를 사용하여 대체할 수 있다.(위 함수 설명 자세히보기)
-2. 둘 이상의 스레드가 동일 시간에 크리티컬 섹션 진입 경쟁을 하는 경우 이벤트 커널 오브젝트를 생성 시, 생성에 실패할 수 있다.
+2. 둘 이상의 스레드가 동일 시간에 크리티컬 섹션 진입 경쟁을 하는 경우 이벤트 커널 오브젝트를 생성 하는데, 생성에 실패할 수도 있다.
+
+## Section05 슬림 리더-라이더 락(SRWLock, Slim Reader-Write Lock)
+### SRWLock
+1. SRWLock: 크리티컬 섹션 기능과 유사하지만 차이점은, 공유 리소스의 값을 읽기만 하는 스레드(Reader)와 쓰기하는 스레드(Writer)들이 완전히 구분되어 있을 경우에 사용할 수 있다.
+2. SRWLock 함수
+    <pre><code>
+    // SRWLock 구조체
+    typedef struct _RTL_SRWLOCK {                            
+        PVOID Ptr;  // 이 포인터가 무엇을 가리키는지 문서화되어 있지 않기 때문에, 이 멤버를 직접 사용할 수는 없다,                   
+    } RTL_SRWLOCK, *PRTL_SRWLOCK;    
+    
+    // SRWLock 구조체를 할당하고 초기화 한다.
+    void InitializeSRWLock(
+        PSRWLOCK SRWLock
+    );
+    
+    // Writer 스레드가 공유 리소스에 배타적으로 접근하기 위한 함수
+    // EnterCriticalSection와 비슷한 역할
+    void AcquireSRWLockExclusive(
+        PSRWLOCK SRWLock
+    );
+    
+    // Write 스레드가 공유 리소스를 모두 사용한 후 Lock 해제
+    // LeaveCriticalSection와 비슷한 역할
+    void ReleaseSRWLockExclusive(
+        PSRWLOCK SRWLock
+    );
+    
+    // Reader 스레드가 공유 리소스에 접근하기 위한 함수
+    // Write 스레드가 AcquireSRWLockExclusive으로 접근한 경우 스레드 상태가 Block 된다.
+    void AcquireSRWLockShared(
+        PSRWLOCK SRWLock
+    );
+    
+    // Reader 스레드가 공유 리소스를 모두 사용한 후 Lock 해제
+    void ReleaseSRWLockShared(
+        PSRWLOCK SRWLock
+    );    
+    </code></pre>
+3. SRWLock 오브젝트는 반복적으로 획득할 수 없다. 따라서 단일 스레드가 리소스의 값을 수정하기 위해 여러번 락을 수행할 수 없다.
+4. SRWLock은 크리티컬 섹션보다 확장성과 성능이 좋다.
+5. 락을 설정한다는 것은 특정 시간에 단일의 CPU만 메모리에 접근할 수 있도록 허용한다는 것이다.
