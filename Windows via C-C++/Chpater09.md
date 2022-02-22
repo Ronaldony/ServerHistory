@@ -46,3 +46,7 @@
 ### APC
 1. APC 큐에 있는 APC 요청들이 모두 처리되어야 비로소 Alertable(알림 가능한) 함수가 반환된다.
     1) Alertable 함수: SleepEx, WaitForSingleObjectEx 등...
+
+## Section07 편리한 스레드 동기화
+* 이 섹션에는 오브젝트 논시그널 상태, 시그널 상태, Successful wait side effet에 관한 정리표가 작성되어 있다.
+
