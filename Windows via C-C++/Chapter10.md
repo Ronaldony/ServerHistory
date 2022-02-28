@@ -35,7 +35,7 @@
         HANDLE hThread
     );
     </code></pre>
-    
+
 ## Section04 비동기 장치 I/O의 기본
 ### 비동기 I/O
 1. 비동기 I/O 요청: 스레드가 비동기 I/O 요청 시 실제로 I/O 작업을 수행할 장치의 디바이스 드라이버로 전달된다. 이때 디바이스 드라이버가 장치로부터의 응답(처리)를 대기해 주기 때문에 L7의 어플리케이션은 I/O 요청 완료를 대기하지 않고 다른 작업을 계속 수행한다.
@@ -57,3 +57,51 @@
     |이벤트 커널 오브젝트의 시그널링|위와 동일. 그러나 단일 장치에 대해 다수의 I/O 요청 수행 가능|
     |얼러터블(Alertable) I/O|항상 I/O 요청을 삽입한 스레드가 완료 통지를 수신한다.|
     |I/O 컴플리션 포트|특정 스레드가 I/O 요청을 삽입하고 다른 스레드가 완료 통지를 수신할 수 있다. 이 방법이 가장 확장성이 뛰어나고 유연성이 있다.|
+
+### I/O 컴플리션 포트(이하 IOCP) 생성
+1. IOCP를 구현한 이론적 배경은 동시에 수행할 수 있는 스레드 개수의 상한을 설정할 수 있어야 한다는 것이다.
+2. IOCP는 클라이언트의 요청에 따라 그때마다 스레드의 생성과 소멸을 하는 것이 아닌 **스레드 풀**을 이용하도록 설계되었다.
+3. IOCP 생성 함수
+    <pre><code>
+    // 이 함수는 서로 다른 두 가지 작업을 수행한다.
+    // 기능1: I/O 컴플리션 포트 생성
+    // 기능2: I/O 컴플리션 포트를 연계
+    HANDLE CreateIoCompletionPort(
+        HANDLE      hFile,
+        HANDLE      hExistingCompletionPort,
+        ULONG_PTR   CompletionKey,
+        DWORD       dwNumberOfConcurrentThreads);
+        
+    // 사용 예시1: IOCP 생성
+    CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 스레드 개수); // dwNumberOfConcurrentThreads에 0 전달 시 CPU 개수로 동시에 수행 가능한 스레드의 최대 개수로 설정
+    
+    // 사용 예시2: 장치와 IOCP의 연계
+    CreateIoCompletionPort(장치 핸들, 컴플리션 포트 핸들, 컴플리션 키, 0); // 컴플리션 키 값은 사용자가 임의로 결정    
+    </code></pre>
+
+### I/O 컴플리션 포트를 이용한 아키텍처 설계
+1. 컴플리션 큐 대기 함수
+    1) 개요: 호출한 스레드를 대기시켜 비동기 장치 I/O 완료 통지를 처리하는 기능의 함수
+    2) 자세한 기능: 이 함수를 호출한 스레드의 ID 값이 대기 스레드 큐에 삽입되며, 이를 통해 IOCP 커널 오브젝트는 비동기 I/O 완료 통지를 처리할 스레드를 구분한다. IO 컴플리션 큐에 항목이 추가되면 IOCP는 대기 스레드 큐에 있는 스레드 중 하나를 깨운다. 이 스레드는 컴플리션 큐에 삽입된 항목으로부터 송수신된 바이트 수, 컴플리션 키, OVERLAPPED 구조체의 주소를 가져오게 된다.
+    <pre><code> 
+    BOOL GetQueuedCompletionStatus(
+        HANDLE       CompletionPort,
+        LPDWORD      lpNumberOfBytesTransferred,
+        PULONG_PTR   lpCompletionKey,
+        LPOVERLAPPED *lpOverlapped송,
+        DWORD        dwMilliseconds
+    );
+    </code></pre>
+    * 컴플리션 큐: 비동기 I/O 작업이 완료되면 완료 통지 정보가 추가되는 큐
+    * 대기 스레드 큐: 완료 통지가 된 후 이에 대한 작업을 수행할 스레드의 큐
+2. 일반적으로 GetQueuedCompletionStatus를 호출하여 대기 상태에 들어간 스레드를 IOCP에 "할당된"스레드라고 부른다.
+
+### IOCP의 절차
+1. IOCP의 생성 및 진행 절차
+    1) IOCP 생성
+    2) IOCP 장치의 연계를 통해 장치 리스트에 장치 항목을 추가
+    3) IOCP에 비동기 I/O 요청
+    4) 스레드 IOCP 완료 통지 처리를 위한 대기 상태 전환
+    5) I/O 요청이 완료되면 시스템은 장치와 연계된 IOCP를 찾아 해당 I/O 컴플리션 큐에 I/O 요청의 완료통지를 나타내는 새로운 항목을 삽입
+    6) 컴플리션 큐에 있는 완료 통지의 정보를 대기 쓰레드 큐 중 가장 마지막으로 입력된 스레드에 전달 후 스레드 재개
+    7) 6에서 재개 시 IOCP는 릴리즈 스레드 리스트에 해당 스레드의 ID를 기록해두고 해당 스레드가 어떠한 함수 호출로 인해 대기 상태로 진입하면 다시 스레드의 ID를 일시 정지 스레드 리스트로 기록을 옮긴다.
